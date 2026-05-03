@@ -3,8 +3,11 @@ export const generateResumeAPI = async (userData) => {
   console.log("🚀 Sending data to the secure backend...");
   
   try {
-    // We send a POST request to the exact port your server is listening on
-    const API_URL = 'https://resume-api-YOUR-UNIQUE-ID.onrender.com/api/generate-resume', {
+    // 1. Define the URL
+    const API_URL = 'https://resume-api-rr5i.onrender.com/api/generate-resume';
+    
+    // 2. ACTUALLY CALL FETCH!
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
