@@ -69,7 +69,17 @@ function BuilderFlow() {
   const [finalResume, setFinalResume] = useState('');
   const [editId, setEditId] = useState(null); 
   
-  // FIXED: Initialize useLocation so the Dashboard catcher works
+  // 🔥 NEW: State for dynamic loading text
+  const [loadingText, setLoadingText] = useState("Waking up the AI Engine...");
+  
+  const loadingMessages = [
+    "Analyzing your work history...",
+    "Extracting leadership metrics...",
+    "Writing executive summary...",
+    "Formulating career coaching insights...",
+    "Polishing the final draft..."
+  ];
+
   const location = useLocation();
 
   useEffect(() => {
@@ -98,6 +108,14 @@ function BuilderFlow() {
     
     setStep(7); 
     setIsGenerating(true);
+    setLoadingText(loadingMessages[0]); // Reset text
+
+    // Start cycling through messages
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % loadingMessages.length;
+      setLoadingText(loadingMessages[messageIndex]);
+    }, 2500);
 
     try {
       let aiResponse = await generateResumeAPI(finalProfile);
@@ -110,20 +128,32 @@ function BuilderFlow() {
       console.error("AI Generation failed:", error);
       alert("The AI engine took too long to respond. Please click Regenerate.");
     } finally {
+      clearInterval(messageInterval); // Stop the timer!
       setIsGenerating(false);
     }
   };
 
   const handleRegenerate = async () => {
     setIsGenerating(true);
+    setLoadingText(loadingMessages[0]); // Reset text
+
+    // Start cycling through messages for regeneration too
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % loadingMessages.length;
+      setLoadingText(loadingMessages[messageIndex]);
+    }, 2500);
+
     try {
       const aiResponse = await generateResumeAPI(userData);
       setFinalResume(aiResponse);
     } catch (error) {
       console.error("Failed to regenerate:", error);
       alert("Error connecting to AI. Please ensure the backend is running.");
+    } finally {
+      clearInterval(messageInterval); // Stop the timer!
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   return (
@@ -168,7 +198,17 @@ function BuilderFlow() {
       {step === 7 && (
         <>
           {isGenerating ? (
-             <div style={{ textAlign: 'center', marginTop: '100px', fontSize: '24px', fontWeight: 'bold', color: '#3b82f6' }}>Drafting your profile...</div>
+             <div style={{ textAlign: 'center', marginTop: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+               {/* Built-in CSS Spinner */}
+               <div style={{ width: '60px', height: '60px', border: '6px solid #e2e8f0', borderTopColor: '#38bdf8', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+               <style>
+                 {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+               </style>
+               {/* Dynamic Text */}
+               <h3 style={{ marginTop: '25px', fontSize: '22px', fontWeight: 'bold', color: '#0f172a', transition: 'opacity 0.3s ease-in-out' }}>
+                 {loadingText}
+               </h3>
+             </div>
           ) : (
             <FinalResumeView 
               resumeText={finalResume} 

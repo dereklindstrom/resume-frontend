@@ -1,4 +1,15 @@
 import { useState, useEffect } from 'react';
+
+const [isLoading, setIsLoading] = useState(false);
+const [loadingText, setLoadingText] = useState("Waking up the AI Engine...");
+
+const loadingMessages = [
+  "Analyzing your work history...",
+  "Extracting leadership metrics...",
+  "Writing executive summary...",
+  "Formulating career coaching insights...",
+  "Polishing the final draft..."
+];
 import { useNavigate } from 'react-router-dom';
 import { db, auth } from './firebase';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
