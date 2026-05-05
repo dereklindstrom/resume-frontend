@@ -1,15 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
-// 1. IMPORT THE BROWSER ROUTER
-import { BrowserRouter } from 'react-router-dom'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App.jsx';
+import { Analytics } from '@vercel/analytics/react';
+
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* 2. WRAP YOUR APP COMPONENT */}
     <BrowserRouter>
       <App />
+      <Analytics /> {/* This must be used as a tag, inside the tree! */}
     </BrowserRouter>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);
