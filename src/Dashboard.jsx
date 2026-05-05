@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-const [isLoading, setIsLoading] = useState(false);
-const [loadingText, setLoadingText] = useState("Waking up the AI Engine...");
-
 const loadingMessages = [
   "Analyzing your work history...",
   "Extracting leadership metrics...",
