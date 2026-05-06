@@ -1,11 +1,14 @@
 // This function securely hands the user's data to your local Node.js backend
-export const generateResumeAPI = async (userData) => {
+  
+    export const generateResumeAPI = async (userData) => {
   console.log("🚀 Sending data to the secure backend...");
   
+  // ADD THIS LINE: Let's X-Ray the package before it leaves the frontend!
+  console.log("📦 PAYLOAD CHECK:", JSON.stringify(userData.experienceDetails, null, 2));
+  
   try {
-    // 1. Define the URL
     const API_URL = 'https://resume-api-rr5i.onrender.com/api/generate-resume';
-    
+
     // 2. ACTUALLY CALL FETCH!
     const response = await fetch(API_URL, {
       method: 'POST',
