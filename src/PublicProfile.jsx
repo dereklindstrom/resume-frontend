@@ -62,8 +62,11 @@ export default function PublicProfile() {
     <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh', paddingBottom: '50px' }}>
       <FinalResumeView 
         resumeText={profileData.profileData} 
-        userData={profileData.userData}
-        isPublicView={true} // We'll use this to hide the "Edit" and "Save" buttons
+        
+        {/* 🔥 THE FIX: Merge the media object into the userData so the resume can see it! */}
+        userData={{ ...profileData.userData, media: profileData.media }} 
+        
+        isPublicView={true} 
       />
       
       {/* Small subtle branding footer for recruiters */}
