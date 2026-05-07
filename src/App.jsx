@@ -8,6 +8,7 @@ import LandingPage from './LandingPage';
 import Dashboard from './Dashboard';
 import AuthScreen from './AuthScreen';
 import PublicResumeView from './PublicResumeView';
+import PublicProfile from './PublicProfile';
 
 // --- BUILDER STEPS ---
 import BaselineForm from './BaselineForm';
@@ -248,6 +249,7 @@ export default function App() {
       {/* Public Routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/p/:id" element={<PublicResumeView />} />
+      <Route path="/p/:profileId" element={<PublicProfile />} />
       
       {/* Auth Screen (Redirects to dashboard if already logged in) */}
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
