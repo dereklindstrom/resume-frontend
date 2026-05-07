@@ -7,7 +7,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating }) {
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false }) {
   const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
@@ -241,8 +241,9 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       <div style={{ maxWidth: '1200px', margin: '30px auto', fontFamily: 'system-ui' }}>
         
         {/* --- MAIN APP CONTROL PANEL --- */}
-        <div className="no-print" style={{ backgroundColor: '#0f172a', padding: '20px 30px', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid #1e293b' }}>
-          
+        {!isPublicView && (
+  <div className="no-print" style={{ backgroundColor: '#0f172a', padding: '20px 30px', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid #1e293b' }}>
+
           {/* LEFT: View Toggles */}
           <div style={{ display: 'flex', backgroundColor: '#1e293b', borderRadius: '10px', padding: '6px' }}>
              <button onClick={() => setActiveView('resume')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'resume' ? '#38bdf8' : 'transparent', color: activeView === 'resume' ? '#0f172a' : '#94a3b8' }}>
@@ -289,9 +290,10 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
           </div>
         </div>
 
+)}
         {/* --- SECONDARY CONTROL BAR --- */}
-        {activeView === 'resume' && (
-          <div className="no-print" style={{ backgroundColor: '#1e293b', padding: '15px 30px', display: 'flex', gap: '30px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        {!isPublicView && activeView === 'resume' && (
+  <div className="no-print" style={{ backgroundColor: '#1e293b', padding: '15px 30px', display: 'flex', gap: '30px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div>
               <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><LayoutTemplate size={12}/> Template</span>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
