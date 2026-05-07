@@ -25,6 +25,7 @@
       try {
         // Parse the raw JSON string from your backend
         const aiData = JSON.parse(data.resume);
+        console.log("🕵️ EXACT AI JSON:", aiData);
         
         let formattedResume = `## Professional Summary\n`;
         formattedResume += `${aiData.summary}\n\n`;
