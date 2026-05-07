@@ -7,7 +7,6 @@ import { onAuthStateChanged } from 'firebase/auth';
 import LandingPage from './LandingPage';
 import Dashboard from './Dashboard';
 import AuthScreen from './AuthScreen';
-import PublicResumeView from './PublicResumeView';
 import PublicProfile from './PublicProfile';
 
 // --- BUILDER STEPS ---
@@ -51,7 +50,7 @@ const ProgressBar = ({ currentStep, setStep }) => {
               <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: isActive || isPast ? '#38bdf8' : '#f8fafc', border: `3px solid ${isActive || isPast ? '#38bdf8' : '#e2e8f0'}`, color: isActive || isPast ? '#0f172a' : '#94a3b8', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '14px', transition: 'all 0.3s ease', boxShadow: isActive ? '0 0 0 4px rgba(56, 189, 248, 0.2)' : 'none' }}>
                 {isPast ? '✓' : step.num}
               </div>
-              <span style={{ fontSize: '12px', fontWeight: isActive ? '700' : '500', color: isActive ? '#0f172a' : '#64748b', display: window.innerWidth < 600 && !isActive ? 'none' : 'block' }}>
+              <span style={{ fontSize: '12px', fontWeight: isActive ? '700' : '500', color: isActive ? '#0f172a' : '#64748b' }}>
                 {step.label}
               </span>
             </div>
@@ -69,8 +68,6 @@ function BuilderFlow() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [finalResume, setFinalResume] = useState('');
   const [editId, setEditId] = useState(null); 
-  
-  // 🔥 NEW: State for dynamic loading text
   const [loadingText, setLoadingText] = useState("Waking up the AI Engine...");
   
   const loadingMessages = [
@@ -106,12 +103,10 @@ function BuilderFlow() {
   const handleVideoComplete = async (videoData) => {
     const finalProfile = { ...userData, media: videoData };
     setUserData(prev => ({ ...prev, media: videoData }));
-    
     setStep(7); 
     setIsGenerating(true);
-    setLoadingText(loadingMessages[0]); // Reset text
+    setLoadingText(loadingMessages[0]);
 
-    // Start cycling through messages
     let messageIndex = 0;
     const messageInterval = setInterval(() => {
       messageIndex = (messageIndex + 1) % loadingMessages.length;
@@ -120,109 +115,50 @@ function BuilderFlow() {
 
     try {
       let aiResponse = await generateResumeAPI(finalProfile);
-      if (!aiResponse || aiResponse.trim() === '') {
-        console.log("AI returned empty, attempting auto-retry...");
-        aiResponse = await generateResumeAPI(finalProfile);
-      }
       setFinalResume(aiResponse);
     } catch (error) {
       console.error("AI Generation failed:", error);
-      alert("The AI engine took too long to respond. Please click Regenerate.");
+      alert("The AI engine took too long. Please click Regenerate.");
     } finally {
-      clearInterval(messageInterval); // Stop the timer!
+      clearInterval(messageInterval);
       setIsGenerating(false);
     }
   };
 
   const handleRegenerate = async () => {
     setIsGenerating(true);
-    setLoadingText(loadingMessages[0]); // Reset text
-
-    // Start cycling through messages for regeneration too
-    let messageIndex = 0;
-    const messageInterval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % loadingMessages.length;
-      setLoadingText(loadingMessages[messageIndex]);
-    }, 2500);
-
     try {
       const aiResponse = await generateResumeAPI(userData);
       setFinalResume(aiResponse);
     } catch (error) {
       console.error("Failed to regenerate:", error);
-      alert("Error connecting to AI. Please ensure the backend is running.");
     } finally {
-      clearInterval(messageInterval); // Stop the timer!
       setIsGenerating(false);
     }
   };
 
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '20px' }}>
-      
       <ProgressBar currentStep={step} setStep={setStep} />
-
       {step === 1 && <BaselineForm onComplete={handleBaselineComplete} />}
-      
       {step === 2 && <ExperienceFork onSelect={handleExperienceSelect} onBack={() => setStep(step - 1)} />}
-      
-      {step === 3 && <ExperienceDetails 
-        level={userData.experienceLevel} 
-        savedData={userData.experienceDetails} 
-        onComplete={handleDetailsComplete} 
-        onBack={(partialData) => { 
-          setUserData(prev => ({ ...prev, experienceDetails: partialData })); 
-          setStep(2); 
-        }} 
-      />}
-      
-      {step === 4 && <ObjectiveForm 
-        workHistory={userData.experienceDetails?.workHistory} 
-        savedData={userData.objective} 
-        onComplete={handleObjectiveComplete} 
-        onBack={(partialData) => { 
-          setUserData(prev => ({ ...prev, objective: partialData })); 
-          setStep(3); 
-        }} 
-      />}
-      
-      {step === 5 && <BehavioralQuestions 
-        targetIndustry={userData.objective?.targetIndustry} 
-        targetRole={userData.objective?.targetRole} 
-        workHistory={userData.experienceDetails?.workHistory} 
-        onComplete={handleStoriesComplete} 
-        onBack={() => setStep(step - 1)} 
-      />}
-      
+      {step === 3 && <ExperienceDetails level={userData.experienceLevel} savedData={userData.experienceDetails} onComplete={handleDetailsComplete} onBack={() => setStep(2)} />}
+      {step === 4 && <ObjectiveForm workHistory={userData.experienceDetails?.workHistory} savedData={userData.objective} onComplete={handleObjectiveComplete} onBack={() => setStep(3)} />}
+      {step === 5 && <BehavioralQuestions onComplete={handleStoriesComplete} onBack={() => setStep(step - 1)} />}
       {step === 6 && <VideoStep onComplete={handleVideoComplete} onBack={() => setStep(step - 1)} />}
-
       {step === 7 && (
         <>
           {isGenerating ? (
              <div style={{ textAlign: 'center', marginTop: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-               {/* Built-in CSS Spinner */}
                <div style={{ width: '60px', height: '60px', border: '6px solid #e2e8f0', borderTopColor: '#38bdf8', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-               <style>
-                 {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
-               </style>
-               {/* Dynamic Text */}
-               <h3 style={{ marginTop: '25px', fontSize: '22px', fontWeight: 'bold', color: '#0f172a', transition: 'opacity 0.3s ease-in-out' }}>
-                 {loadingText}
-               </h3>
+               <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+               <h3 style={{ marginTop: '25px', fontSize: '22px', fontWeight: 'bold', color: '#0f172a' }}>{loadingText}</h3>
              </div>
           ) : (
-            <FinalResumeView 
-              resumeText={finalResume} 
-              userData={userData} 
-              editId={editId}
-              onReset={() => window.location.reload()} 
-              onRegenerate={handleRegenerate}    
-              isGenerating={isGenerating}        
-            />
+            <FinalResumeView resumeText={finalResume} userData={userData} editId={editId} onReset={() => window.location.reload()} onRegenerate={handleRegenerate} isGenerating={isGenerating} />
           )}
         </>
       )}
-
     </div>
   );
 }
@@ -246,17 +182,19 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public Pages */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/p/:id" element={<PublicResumeView />} />
       <Route path="/p/:profileId" element={<PublicProfile />} />
       
-      {/* Auth Screen (Redirects to dashboard if already logged in) */}
+      {/* Auth */}
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
       
-      {/* Protected Routes (Requires Login) */}
+      {/* Protected */}
       <Route path="/builder" element={user ? <BuilderFlow /> : <Navigate to="/login" />} />
       <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }
