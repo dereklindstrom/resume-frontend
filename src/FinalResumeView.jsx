@@ -154,8 +154,8 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     return (
       <div className={`video-module-print-hide ${pdfAction === 'remove' ? 'pdf-remove-shape' : ''}`} style={{ textAlign: 'center', marginBottom: layout === 'startup' ? '0' : '40px', position: 'relative', display: 'inline-block' }}>
         <div style={{ position: 'relative', width, height, borderRadius, overflow: 'hidden', margin: '0 auto', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', backgroundColor: '#000', border: `3px solid var(--accent)`, zIndex: 1 }}>
-          {media.mediaType === 'video' && <video className="web-video" src={media.videoUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-          {(printPhotoUrl || media.mediaType === 'photo') && <img className={media.mediaType === 'video' ? "print-photo" : ""} src={printPhotoUrl || media.photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+          {media.mediaType === 'video' && <video className="web-video" src={media.videoUrl || media.publicUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+{(printPhotoUrl || media.mediaType === 'photo') && <img className={media.mediaType === 'video' ? "print-photo" : ""} src={printPhotoUrl || media.photoUrl || media.publicUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
       </div>
     );
