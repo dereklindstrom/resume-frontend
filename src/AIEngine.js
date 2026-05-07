@@ -65,7 +65,7 @@ export const generateResumeAPI = async (userData) => {
             });
           }
         }
-
+console.log("📝 FINAL OUTPUT STRING:", formattedResume);
         return formattedResume;
 
       } catch (parseError) {
