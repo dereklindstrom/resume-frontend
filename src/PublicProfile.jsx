@@ -12,16 +12,19 @@ export default function PublicProfile() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const docRef = doc(db, "resumes", profileId);
-        const docSnap = await getDoc(docRef);
+  const fetchProfile = async () => {
+    console.log("Searching for ID:", profileId); // 👈 Log 1
+    try {
+      const docRef = doc(db, "resumes", profileId);
+      const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-          setProfileData(docSnap.data());
-        } else {
-          setError("This profile doesn't exist or has been removed.");
-        }
+      if (docSnap.exists()) {
+        console.log("Data found:", docSnap.data()); // 👈 Log 2
+        setProfileData(docSnap.data());
+      } else {
+        console.log("No document found in Firestore!");
+        setError("This profile doesn't exist.");
+      }
       } catch (err) {
         console.error("Error fetching public profile:", err);
         setError("Something went wrong while loading this profile.");
