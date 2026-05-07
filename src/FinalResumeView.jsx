@@ -108,11 +108,15 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     setIsPublishing(true);
     try {
       let publicMediaUrl = null;
-      if (media.hasMedia && (media.videoUrl || media.photoUrl)) {
-        const localUrl = media.videoUrl || media.photoUrl;
-        const response = await fetch(localUrl);
+      
+      // 🔥 THE FIX: Tell it to grab the webcam photo (printPhotoUrl) if one was taken!
+      const activeMediaUrl = printPhotoUrl || media.videoUrl || media.photoUrl;
+
+      if (activeMediaUrl) {
+        // fetch() is smart enough to convert base64 webcam data into a real file blob
+        const response = await fetch(activeMediaUrl);
         const blob = await response.blob();
-        const fileRef = ref(storage, `media/${Date.now()}-${media.mediaType}`);
+        const fileRef = ref(storage, `media/${Date.now()}-profile`);
         await uploadBytes(fileRef, blob);
         publicMediaUrl = await getDownloadURL(fileRef);
       }
@@ -125,11 +129,12 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
             objective: userData.objective,
             experienceDetails: userData.experienceDetails
         },
-        design: { layout, palette }, // Removed mediaStyle from database
+        design: { layout, palette },
         media: {
-           hasMedia: media.hasMedia,
-           mediaType: media.mediaType,
-           shape: media.shape,
+           // Ensure the database knows we definitely have media now
+           hasMedia: !!activeMediaUrl || media.hasMedia,
+           mediaType: printPhotoUrl ? 'photo' : media.mediaType,
+           shape: media.shape || 'circle',
            publicUrl: publicMediaUrl 
         },
         createdAt: new Date().toISOString()
