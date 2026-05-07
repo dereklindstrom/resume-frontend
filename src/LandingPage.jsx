@@ -1,212 +1,96 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BrainCircuit, FileText, ChevronRight, CheckCircle, Video, Star, Target } from 'lucide-react';
+import { ArrowRight, BrainCircuit, FileText, Video, Target, TrendingUp } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  // 🎨 THE MASTER BLUE-GRAY DESIGN SYSTEM (With "ResuME" Pops)
-  const styles = {
-    page: { fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: '#0f172a', backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' },
-    
-    // Navbar
-    nav: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 5%', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 100 },
-    logo: { fontSize: '26px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.5px' },
-    logoAccent: { color: '#3b82f6', fontWeight: '900' }, // The "ME" color
-    navButtons: { display: 'flex', gap: '16px' },
-    loginBtn: { padding: '10px 20px', backgroundColor: 'transparent', color: '#475569', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '15px' },
-    signupBtn: { padding: '10px 20px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '15px', transition: 'all 0.2s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
-
-    // Hero Section
-    hero: { padding: '100px 5% 40px', textAlign: 'center', maxWidth: '1000px', margin: '0 auto' },
-    h1: { fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: '800', color: '#1e293b', lineHeight: '1.1', marginBottom: '24px', letterSpacing: '-2px' },
-    heroSubtitle: { fontSize: '20px', color: '#475569', lineHeight: '1.6', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px auto' },
-    heroButton: { padding: '18px 36px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.4)', transition: 'all 0.2s ease' },
-    
-    // Social Proof Avatars
-    avatarGroup: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '32px' },
-    avatarCluster: { display: 'flex', marginLeft: '10px' },
-    avatar: (z, url) => ({ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid #f8fafc', marginLeft: '-15px', zIndex: z, backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' }),
-
-    // Hero Image Mockup (The big graphic)
-    heroImageContainer: { maxWidth: '1000px', margin: '60px auto 0', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)', border: '1px solid #e2e8f0', overflow: 'hidden', padding: '10px' },
-    heroImageInner: { borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f1f5f9', aspectRatio: '16/9', backgroundImage: 'url(https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&w=1200&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' },
-    
-    // Features Section
-    features: { padding: '100px 5%', backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0' },
-    featuresGrid: { display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap', justifyContent: 'center' },
-    card: { flex: '1 1 300px', backgroundColor: '#f8fafc', padding: '40px', borderRadius: '20px', border: '1px solid #e2e8f0', transition: 'transform 0.2s ease, box-shadow 0.2s ease' },
-    cardIconWrapper: { width: '60px', height: '60px', backgroundColor: '#eff6ff', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', marginBottom: '24px' },
-    cardTitle: { fontSize: '22px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' },
-    cardText: { fontSize: '16px', color: '#64748b', lineHeight: '1.6' },
-
-    // Split Showcase Section (Highlighting the "ME")
-    splitSection: { padding: '100px 5%', backgroundColor: '#f8fafc', maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '60px', flexWrap: 'wrap' },
-    splitContent: { flex: '1 1 400px' },
-    splitImage: { flex: '1 1 400px', position: 'relative' },
-    splitImageMain: { width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.15)', objectFit: 'cover', aspectRatio: '4/5' },
-    badge: { position: 'absolute', bottom: '-20px', left: '-20px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '12px' },
-
-    // Bottom CTA
-    cta: { padding: '100px 5%', backgroundColor: '#0f172a', textAlign: 'center', color: '#ffffff', backgroundImage: 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)' },
-    ctaH2: { fontSize: '40px', fontWeight: '800', marginBottom: '20px' },
-    ctaText: { fontSize: '18px', color: '#94a3b8', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px auto' },
-    
-    footer: { padding: '30px 5%', backgroundColor: '#020617', color: '#475569', textAlign: 'center', fontSize: '14px' }
-  };
-
   return (
-    <div style={styles.page}>
+    <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', color: '#f8fafc', fontFamily: 'system-ui, sans-serif' }}>
       
-      {/* NAVBAR */}
-      <nav style={styles.nav}>
-        <div style={styles.logo}>
-          <BrainCircuit size={28} color="#3b82f6" />
-          <span>Resu<span style={styles.logoAccent}>ME</span></span>
+      {/* --- NAVIGATION BAR --- */}
+      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 40px', borderBottom: '1px solid #1e293b' }}>
+        <div style={{ fontSize: '24px', fontWeight: '800', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FileText color="#38bdf8" />
+          Resu<span style={{ color: '#38bdf8' }}>ME</span>
         </div>
-        <div style={styles.navButtons}>
-          <button onClick={() => navigate('/login')} style={styles.loginBtn}>Log In</button>
-          <button onClick={() => navigate('/login')} style={styles.signupBtn}>Sign Up</button>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <button 
+            onClick={() => navigate('/login')} 
+            style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#cbd5e1', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '15px' }}
+          >
+            Log In
+          </button>
+          <button 
+            onClick={() => navigate('/builder')} 
+            style={{ padding: '10px 24px', backgroundColor: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            Get Started <ArrowRight size={16} />
+          </button>
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <header style={styles.hero}>
-        <h1 style={styles.h1}>Don't just list your jobs. <br />Showcase <span style={{ color: '#3b82f6' }}>who you are.</span></h1>
-        <p style={styles.heroSubtitle}>
-          Stop agonizing over bullet points. Build an AI-optimized resume, attach a professional video introduction, and let the real you shine through to recruiters.
-        </p>
-        <button onClick={() => navigate('/builder')} style={styles.heroButton} className="hover-scale">
-          Build Your ResuME for Free <ChevronRight size={20} />
-        </button>
-        
-        {/* Social Proof */}
-        <div style={styles.avatarGroup}>
-          <div style={styles.avatarCluster}>
-            <div style={styles.avatar(3, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80')} />
-            <div style={styles.avatar(2, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80')} />
-            <div style={styles.avatar(1, 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80')} />
-            <div style={styles.avatar(0, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80')} />
-          </div>
-          <div style={{ textAlign: 'left' }}>
-            <div style={{ display: 'flex', color: '#f59e0b', gap: '2px', marginBottom: '2px' }}>
-              <Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" />
-            </div>
-            <span style={{ fontSize: '13px', color: '#475569', fontWeight: '600' }}>Loved by 10,000+ job seekers</span>
-          </div>
+      {/* --- HERO SECTION --- */}
+      <header style={{ maxWidth: '1000px', margin: '0 auto', padding: '100px 20px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-block', padding: '8px 16px', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '30px', color: '#38bdf8', fontSize: '14px', fontWeight: '600', marginBottom: '24px', letterSpacing: '1px' }}>
+          ✨ The AI-Powered Career Coach
         </div>
+        <h1 style={{ fontSize: 'clamp(40px, 6vw, 64px)', fontWeight: '800', lineHeight: '1.1', margin: '0 0 24px 0', letterSpacing: '-1px' }}>
+          Don't just build a resume.<br/>
+          <span style={{ color: '#38bdf8' }}>Engineer your next career move.</span>
+        </h1>
+        <p style={{ fontSize: '20px', color: '#94a3b8', lineHeight: '1.6', maxWidth: '700px', margin: '0 auto 40px auto' }}>
+          Go beyond static documents. ResuME uses advanced AI to build dynamic profiles, analyze your skill gaps, and provide actionable coaching to land your target role.
+        </p>
+        <button 
+          onClick={() => navigate('/builder')} 
+          style={{ padding: '16px 32px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 10px 25px rgba(79, 70, 229, 0.4)', transition: 'transform 0.2s' }}
+        >
+          Build Your Free Profile <ArrowRight size={20} />
+        </button>
       </header>
 
-      {/* HUGE HERO MOCKUP PLACEHOLDER */}
-      <div style={{ padding: '0 5%' }}>
-        <div style={styles.heroImageContainer}>
-          {/* Fake Browser Chrome */}
-          <div style={{ display: 'flex', gap: '8px', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#fca5a5' }}></div>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#fcd34d' }}></div>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#86efac' }}></div>
+      {/* --- FEATURES GRID --- */}
+      <section style={{ backgroundColor: '#1e293b', padding: '80px 20px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: '800', margin: '0 0 16px 0' }}>Powerful tools to stand out.</h2>
+            <p style={{ fontSize: '18px', color: '#94a3b8', margin: 0 }}>Designed for professionals who want to completely control their narrative.</p>
           </div>
-          {/* Main App Image Placeholder */}
-          <div style={styles.heroImageInner}>
-            {/* Optional Overlay Text for the placeholder */}
-            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(15,23,42,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-               <h3 style={{ color: 'white', fontSize: '24px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase' }}>App Interface Placeholder</h3>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* HIGHLIGHTING THE "ME" - SPLIT SECTION */}
-      <section style={styles.splitSection}>
-        <div style={styles.splitContent}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', fontWeight: '700', marginBottom: '16px', fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            <Video size={18} /> Put a face to the name
-          </div>
-          <h2 style={{ fontSize: '36px', fontWeight: '800', color: '#1e293b', marginBottom: '24px', lineHeight: '1.2' }}>Bring your experience to life with a Video Pitch.</h2>
-          <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.7', marginBottom: '32px' }}>
-            Recruiters look at paper resumes for an average of 6 seconds. When you attach a recorded introduction to your ResuME, you instantly become a person, not just a PDF. 
-          </p>
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontWeight: '500' }}>
-              <CheckCircle size={20} color="#10b981" /> Record directly from your phone or webcam
-            </li>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontWeight: '500' }}>
-              <CheckCircle size={20} color="#10b981" /> AI lighting and background studio filters
-            </li>
-            <li style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#475569', fontWeight: '500' }}>
-              <CheckCircle size={20} color="#10b981" /> Increases interview callback rates by up to 40%
-            </li>
-          </ul>
-        </div>
-        <div style={styles.splitImage}>
-          {/* Vibrant Image Placeholder */}
-          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Professional Woman" style={styles.splitImageMain} />
-          <div style={styles.badge}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
-              <PlayCircle size={24} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+            
+            {/* Feature 1 */}
+            <div style={{ backgroundColor: '#0f172a', padding: '40px', borderRadius: '16px', border: '1px solid #334155' }}>
+              <div style={{ width: '50px', height: '50px', backgroundColor: 'rgba(56, 189, 248, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#38bdf8' }}>
+                <Video size={24} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 12px 0' }}>Video Recommendations</h3>
+              <p style={{ color: '#94a3b8', lineHeight: '1.6', margin: 0 }}>Ditch the outdated reference list. Embed up to 3 video testimonials directly into your digital profile via SMS text links.</p>
             </div>
-            <div>
-              <div style={{ fontWeight: '800', color: '#1e293b', fontSize: '18px' }}>"Hi, I'm Sarah!"</div>
-              <div style={{ color: '#64748b', fontSize: '14px' }}>Click to play introduction</div>
+
+            {/* Feature 2 */}
+            <div style={{ backgroundColor: '#0f172a', padding: '40px', borderRadius: '16px', border: '1px solid #334155' }}>
+              <div style={{ width: '50px', height: '50px', backgroundColor: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#8b5cf6' }}>
+                <BrainCircuit size={24} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 12px 0' }}>Advanced AI Coaching</h3>
+              <p style={{ color: '#94a3b8', lineHeight: '1.6', margin: 0 }}>Instantly identify your skill gaps. Our AI maps your history to your target role and builds a custom training program to get you there.</p>
             </div>
+
+            {/* Feature 3 */}
+            <div style={{ backgroundColor: '#0f172a', padding: '40px', borderRadius: '16px', border: '1px solid #334155' }}>
+              <div style={{ width: '50px', height: '50px', backgroundColor: 'rgba(34, 197, 94, 0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#22c55e' }}>
+                <TrendingUp size={24} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 12px 0' }}>Interview Simulations</h3>
+              <p style={{ color: '#94a3b8', lineHeight: '1.6', margin: 0 }}>Practice makes perfect. Conduct realistic, voice-based mock interviews with our AI recruiter and get immediate feedback on your tone.</p>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* FEATURES GRID SECTION */}
-      <section style={styles.features}>
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#1e293b' }}>Everything you need to land the job.</h2>
-        </div>
-        
-        <div style={styles.featuresGrid}>
-          {/* Card 1 */}
-          <div style={styles.card} className="feature-card">
-            <div style={styles.cardIconWrapper}>
-              <FileText size={32} />
-            </div>
-            <h3 style={styles.cardTitle}>Smart ATS Formatting</h3>
-            <p style={styles.cardText}>Our AI Engine perfectly formats your experience using the STAR method, ensuring your achievements pass through automated screening systems.</p>
-          </div>
-
-          {/* Card 2 */}
-          <div style={styles.card} className="feature-card">
-            <div style={styles.cardIconWrapper}>
-              <BrainCircuit size={32} />
-            </div>
-            <h3 style={styles.cardTitle}>AI Career Coaching</h3>
-            <p style={styles.cardText}>Get an instant analysis of your background. Discover high-probability role matches and identify the critical skills you need to secure top-tier offers.</p>
-          </div>
-
-          {/* Card 3 */}
-          <div style={styles.card} className="feature-card">
-            <div style={styles.cardIconWrapper}>
-              <Target size={32} /> {/* Note: Assuming Target is imported from lucide-react in your actual file, if not, use another icon like Star */}
-            </div>
-            <h3 style={styles.cardTitle}>Tailored Objectives</h3>
-            <p style={styles.cardText}>Dynamically shift your resume's focus based on the exact title and industry you are targeting to ensure maximum relevance.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* BOTTOM CTA */}
-      <section style={styles.cta}>
-        <h2 style={styles.ctaH2}>Ready to upgrade your career?</h2>
-        <p style={styles.ctaText}>Join the professionals using ResuME to stand out, get interviews, and negotiate better offers.</p>
-        <button onClick={() => navigate('/builder')} style={{...styles.heroButton, backgroundColor: '#ffffff', color: '#0f172a' }} className="hover-scale">
-          Get Started Now
-        </button>
-      </section>
-
-      {/* FOOTER */}
-      <footer style={styles.footer}>
-        <p>© {new Date().getFullYear()} ResuME. All rights reserved.</p>
-      </footer>
-
-      {/* Hover Effects */}
-      <style>{`
-        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
-        .hover-scale:hover { transform: scale(1.02); }
-      `}</style>
     </div>
   );
 }
