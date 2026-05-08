@@ -63,7 +63,7 @@ export default function PublicProfile() {
       <FinalResumeView 
         resumeText={profileData.profileData} 
         
-        {/* 🔥 THE FIX: Merge the media object into the userData so the resume can see it! */}
+        /* 🔥 THE FIX: Merge the media object into the userData so the resume can see it! */
         userData={{ ...profileData.userData, media: profileData.media }} 
         
         isPublicView={true} 
