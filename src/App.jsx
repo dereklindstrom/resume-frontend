@@ -8,6 +8,7 @@ import LandingPage from './LandingPage';
 import Dashboard from './Dashboard';
 import AuthScreen from './AuthScreen';
 import PublicProfile from './PublicProfile';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // --- BUILDER STEPS ---
 import BaselineForm from './BaselineForm';
@@ -182,19 +183,33 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/p/:profileId" element={<PublicProfile />} />
-      
-      {/* Auth */}
-      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
-      
-      {/* Protected */}
-      <Route path="/builder" element={user ? <BuilderFlow /> : <Navigate to="/login" />} />
-      <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+  {/* Public Pages */}
+  <Route path="/" element={<LandingPage />} />
+  <Route path="/p/:profileId" element={<PublicProfile />} />
+  
+  {/* Auth Page - Send logged-in users directly to dashboard so they don't see the login screen again */}
+  <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
+  
+  {/* 🔒 Protected Pages - Wrapped in our new Bouncer */}
+  <Route 
+    path="/builder" 
+    element={
+      <ProtectedRoute user={user} isLoading={isLoading}>
+        <BuilderFlow />
+      </ProtectedRoute>
+    } 
+  />
+  <Route 
+    path="/dashboard" 
+    element={
+      <ProtectedRoute user={user} isLoading={isLoading}>
+        <Dashboard />
+      </ProtectedRoute>
+    } 
+  />
 
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+  {/* Catch-all - If they type a random URL, send them home */}
+  <Route path="*" element={<Navigate to="/" />} />
+</Routes>
   );
 }

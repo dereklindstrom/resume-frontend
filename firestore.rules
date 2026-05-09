@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 🏠 Rule for User Profiles
+    // Only the owner can read/write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 📄 Rule for Resumes
+    // Anyone can VIEW a resume (so the public link works!)
+    // But ONLY the owner can create, edit, or delete it
+    match /resumes/{resumeId} {
+      allow read: if true; 
+      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}

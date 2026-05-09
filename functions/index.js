@@ -1,6 +1,5 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY); // 👈 Paste your sk_test_... key here
 const cors = require("cors")({ origin: true });
 
 admin.initializeApp();
@@ -10,6 +9,14 @@ const db = admin.firestore();
 exports.createStripeCheckout = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     try {
+      // 🔥 THE FIX: We load Stripe INSIDE the function so it doesn't block deployment!
+      const stripeKey = process.env.STRIPE_SECRET_KEY;
+      if (!stripeKey) {
+        console.error("Missing Stripe Key! Check your .env file.");
+        return res.status(500).send({ error: "Server misconfiguration." });
+      }
+      const stripe = require("stripe")(stripeKey);
+
       const { priceId, userId, successUrl, cancelUrl } = req.body;
 
       if (!priceId || !userId) {
@@ -19,16 +26,16 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
-        allow_promotion_codes: true, // 👈 Ensures the discount box is visible!
+        allow_promotion_codes: true, // Ensures the discount box is visible!
         line_items: [
           {
-            price: priceId, // The ID from your Stripe Dashboard (e.g., price_12345)
+            price: priceId,
             quantity: 1,
           },
         ],
         success_url: successUrl,
         cancel_url: cancelUrl,
-        client_reference_id: userId, // We pass the UID here so Stripe remembers who bought it
+        metadata: { userId: userId },
       });
 
       res.status(200).send({ url: session.url });

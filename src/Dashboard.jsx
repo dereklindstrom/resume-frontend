@@ -1,24 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from './firebase';
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
-import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit } from 'lucide-react';
+import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isSuccess = searchParams.get('success') === 'true';
+
   const [resumes, setResumes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
 
-  // 🔥 THE FETCHER: Reaches into Firestore to grab the user's saved data
   useEffect(() => {
-    const fetchSavedResumes = async () => {
+    const fetchDashboardData = async () => {
       if (!auth.currentUser) {
         navigate('/login');
         return;
       }
 
       try {
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists() && userDocSnap.data().isPremium) {
+          setIsPremium(true);
+        }
+
         const q = query(
           collection(db, "resumes"),
           where("userId", "==", auth.currentUser.uid)
@@ -31,19 +41,49 @@ export default function Dashboard() {
           fetchedResumes.push({ id: doc.id, ...doc.data() });
         });
 
-        // Sort by newest first in memory
         fetchedResumes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setResumes(fetchedResumes);
 
       } catch (error) {
-        console.error("Error fetching resumes:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchSavedResumes();
+    fetchDashboardData();
   }, [navigate]);
+
+  // 🔥 THE UPGRADE ENGINE: Connects your button to Stripe
+  const handleUpgradeClick = async () => {
+    try {
+      const button = document.getElementById('upgrade-btn');
+      if (button) button.innerText = "Connecting...";
+
+      const response = await fetch("https://us-central1-resume-e577b.cloudfunctions.net/createStripeCheckout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId: "price_1TV0t4CNR4URVUQBoBvHFYDK", // 
+          userId: auth.currentUser.uid,
+          successUrl: window.location.origin + "/dashboard?success=true",
+          cancelUrl: window.location.origin + "/dashboard?canceled=true",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Checkout failed: " + data.error);
+        if (button) button.innerText = "Upgrade to Premium";
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Something went wrong connecting to Stripe.");
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -51,7 +91,7 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (e, id) => {
-    e.stopPropagation(); // Prevents the card click from triggering
+    e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this profile?")) {
       await deleteDoc(doc(db, "resumes", id));
       setResumes(resumes.filter(r => r.id !== id));
@@ -59,7 +99,6 @@ export default function Dashboard() {
   };
 
   const handleOpenResume = (resumeData) => {
-    // Navigates to the builder and passes the saved data so it loads instantly!
     navigate('/builder', { state: { editData: resumeData } });
   };
 
@@ -68,10 +107,32 @@ export default function Dashboard() {
       
       {/* NAVBAR */}
       <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 5%', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.5px' }}>
-          <BrainCircuit size={28} color="#3b82f6" />
-          <span>Resu<span style={{ color: '#3b82f6', fontWeight: '900' }}>ME</span></span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.5px' }}>
+            <BrainCircuit size={28} color="#3b82f6" />
+            <span>Resu<span style={{ color: '#3b82f6', fontWeight: '900' }}>ME</span></span>
+          </div>
+          
+          {/* 🔥 THE BUTTON: Swaps between Badge and Buy Button */}
+          {isPremium ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#fef08a', color: '#854d0e', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
+              <Star size={14} fill="#eab308" color="#eab308" /> Premium
+            </div>
+          ) : (
+            <button 
+              id="upgrade-btn"
+              onClick={handleUpgradeClick}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#1e293b', 
+                color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', 
+                fontWeight: '700', border: 'none', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' 
+              }}
+            >
+              <Star size={14} fill="#eab308" color="#eab308" /> Upgrade to Premium
+            </button>
+          )}
         </div>
+
         <div style={{ display: 'flex', gap: '16px' }}>
           <button onClick={handleSignOut} style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'background 0.2s' }}>
             <LogOut size={16} /> Sign Out
@@ -82,7 +143,16 @@ export default function Dashboard() {
       {/* DASHBOARD CONTENT */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 5%' }}>
         
-        {/* Header Area */}
+        {isSuccess && (
+          <div style={{ backgroundColor: '#ecfdf5', borderLeft: '4px solid #10b981', padding: '16px', marginBottom: '32px', borderRadius: '0 8px 8px 0', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '24px' }}>🎉</span>
+            <div>
+              <p style={{ color: '#065f46', fontWeight: '700', margin: '0 0 4px 0' }}>Upgrade Successful!</p>
+              <p style={{ color: '#047857', margin: 0, fontSize: '14px' }}>Your account is now Premium. You have full access to all templates and features.</p>
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
           <div>
             <h1 style={{ fontSize: '36px', fontWeight: '800', color: '#1e293b', margin: '0 0 8px 0', letterSpacing: '-1px' }}>My Profiles</h1>
@@ -96,7 +166,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Loading State */}
         {isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', color: '#3b82f6' }}>
             <Loader2 size={40} className="spin-animation" />
@@ -104,10 +173,7 @@ export default function Dashboard() {
             <style>{`.spin-animation { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
-          
-          /* The Grid */
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-            
             {resumes.length === 0 ? (
               <div style={{ gridColumn: '1 / -1', backgroundColor: '#ffffff', padding: '60px', borderRadius: '20px', border: '1px dashed #cbd5e1', textAlign: 'center' }}>
                 <FileText size={48} color="#94a3b8" style={{ margin: '0 auto 16px auto' }} />
@@ -124,8 +190,6 @@ export default function Dashboard() {
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0,0,0,0.05)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'; }}
                 >
-                  
-                  {/* 🔥 NEW: Profile Thumbnail & Delete Button Header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                     {resume.media?.hasMedia && resume.media?.publicUrl ? (
                       <img 
