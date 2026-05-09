@@ -8,7 +8,7 @@ import LandingPage from './LandingPage';
 import Dashboard from './Dashboard';
 import AuthScreen from './AuthScreen';
 import PublicProfile from './PublicProfile';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './ProtectedRoute';
 
 // --- BUILDER STEPS ---
 import BaselineForm from './BaselineForm';
