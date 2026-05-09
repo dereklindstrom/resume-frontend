@@ -1,28 +1,26 @@
-import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Adjust path to your AuthContext
+import { Loader2 } from 'lucide-react'; // Using the same icon from your Dashboard!
 
-const ProtectedRoute = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+export default function ProtectedRoute({ user, isLoading, children }) {
   const location = useLocation();
 
-  // 1. Wait for Firebase to figure out if the user is logged in
-  if (loading) {
+  // 1. If Firebase is still figuring out who the user is, show a spinner
+  if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f8fafc' }}>
+        <Loader2 size={40} color="#3b82f6" className="spin-animation" />
+        <p style={{ marginTop: '16px', color: '#64748b', fontWeight: '600' }}>Verifying access...</p>
+        <style>{`.spin-animation { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  // 2. If no user is found, send them to login
-  if (!currentUser) {
-    // We save the 'location' so we can send them back where they were after they log in
+  // 2. If we are sure they are NOT logged in, kick them to the login page
+  if (!user) {
+    // The "state" part remembers where they were trying to go, so we can send them back after they log in
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. If they are logged in, let them through!
+  // 3. If they are logged in, open the door and let them see the page!
   return children;
-};
-
-export default ProtectedRoute;
+}
