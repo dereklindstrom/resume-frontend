@@ -167,12 +167,12 @@ function BuilderFlow() {
 // 🔥 The Global App Router
 export default function App() {
   const [user, setUser] = useState(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsCheckingAuth(false);
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -199,14 +199,14 @@ export default function App() {
       </ProtectedRoute>
     } 
   />
-  <Route 
-    path="/dashboard" 
-    element={
-      <ProtectedRoute user={user} isLoading={isLoading}>
-        <Dashboard />
-      </ProtectedRoute>
-    } 
-  />
+ <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute user={user} isLoading={isLoading}>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
 
   {/* Catch-all - If they type a random URL, send them home */}
   <Route path="*" element={<Navigate to="/" />} />
