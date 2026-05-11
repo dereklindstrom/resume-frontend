@@ -177,8 +177,14 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  if (isCheckingAuth) {
-    return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}>
+        <div style={{ width: '40px', height: '40px', border: '4px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <p style={{ marginTop: '16px', color: '#64748b', fontWeight: '600', fontFamily: 'system-ui' }}>Verifying session...</p>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
 
   return (
