@@ -65,7 +65,7 @@ const ProgressBar = ({ currentStep, setStep }) => {
 };
 
 // 🔥 The Main Builder Application
-function BuilderFlow({ isPremium }) {
+function BuilderFlow({ isPremium }) { 
   const [step, setStep] = useState(1);
   const [userData, setUserData] = useState({ experienceLevel: 'Mid Level' });
   const [isGenerating, setIsGenerating] = useState(false);
@@ -116,8 +116,8 @@ function BuilderFlow({ isPremium }) {
       setLoadingText(loadingMessages[messageIndex]);
     }, 2500);
 
-    try {
-    // Pass the premium status to the API call
+   try {
+    // 🌟 Pass isPremium to the AI engine here
     let aiResponse = await generateResumeAPI(finalProfile, isPremium); 
     setFinalResume(aiResponse);
   } catch (error) {
@@ -135,7 +135,7 @@ function BuilderFlow({ isPremium }) {
       // 🌟 Pass 'isPremium' here! 
       // This tells the AI to use the Power Metrics prompt on the existing data.
       const aiResponse = await generateResumeAPI(userData, isPremium); 
-      setFinalResume(aiResponse);
+    setFinalResume(aiResponse);
     } catch (error) {
       console.error("Failed to regenerate:", error);
     } finally {
@@ -226,7 +226,7 @@ useEffect(() => {
   path="/builder" 
   element={
     <ProtectedRoute user={user} isLoading={isLoading}>
-      {/* 🌟 Pass isPremium here */}
+      {/* 🌟 This is where the magic happens */}
       <BuilderFlow isPremium={isPremium} /> 
     </ProtectedRoute>
   } 
