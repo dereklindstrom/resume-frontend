@@ -60,7 +60,7 @@ export default function Dashboard() {
       const button = document.getElementById('upgrade-btn');
       if (button) button.innerText = "Connecting...";
 
-      const response = await fetch("https://us-central1-resume-e577b.cloudfunctions.net/createStripeCheckout", {
+      const response = await fetch("https://createstripecheckout-u4ujgfkbxa-uc.a.run.app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

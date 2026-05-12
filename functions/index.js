@@ -9,10 +9,9 @@ const db = admin.firestore();
 exports.createStripeCheckout = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     try {
-      // 🔥 THE FIX: We load Stripe INSIDE the function so it doesn't block deployment!
       const stripeKey = process.env.STRIPE_SECRET_KEY;
       if (!stripeKey) {
-        console.error("Missing Stripe Key! Check your .env file.");
+        console.error("Missing Stripe Key!");
         return res.status(500).send({ error: "Server misconfiguration." });
       }
       const stripe = require("stripe")(stripeKey);
@@ -26,16 +25,12 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
-        allow_promotion_codes: true, // Ensures the discount box is visible!
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
+        allow_promotion_codes: true,
+        line_items: [{ price: priceId, quantity: 1 }],
         success_url: successUrl,
         cancel_url: cancelUrl,
-        metadata: { userId: userId },
+        // 🌟 We store the ID here...
+        metadata: { userId: userId }, 
       });
 
       res.status(200).send({ url: session.url });
@@ -46,13 +41,15 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
   });
 });
 
-// 🚀 FUNCTION 2: The Webhook (Listens for successful payments)
+// 🚀 FUNCTION 2: The Webhook
 exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
   const event = req.body;
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const userId = session.client_reference_id; 
+    
+    // 🌟 THE FIX: Look in metadata, matching where we saved it above!
+    const userId = session.metadata ? session.metadata.userId : null; 
 
     if (userId) {
       try {
@@ -63,8 +60,10 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         }, { merge: true });
         console.log(`Successfully upgraded user: ${userId}`);
       } catch (error) {
-        console.error("Error updating user in Firestore:", error);
+        console.error("Firestore Update Error:", error);
       }
+    } else {
+      console.error("No userId found in session metadata.");
     }
   }
   res.status(200).send("Webhook received");
