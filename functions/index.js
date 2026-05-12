@@ -7,15 +7,26 @@ const db = admin.firestore();
 
 // 🚀 FUNCTION 1: Create the Checkout Page
 exports.createStripeCheckout = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => {
+  // 🔥 This handles the "Preflight" check (OPTIONS request) from the browser
+  return cors(req, res, async () => {
     try {
+      // 1. EXPLICIT CORS HANDSHAKE:
+      // If the browser is just "pinging" to check security, we respond with a green light immediately.
+      if (req.method === 'OPTIONS') {
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.set('Access-Control-Allow-Headers', 'Content-Type');
+        return res.status(204).send('');
+      }
+
+      // 2. STRIPE LOGIC:
       const stripeKey = process.env.STRIPE_SECRET_KEY;
       if (!stripeKey) {
         console.error("Missing Stripe Key!");
         return res.status(500).send({ error: "Server misconfiguration." });
       }
+      
       const stripe = require("stripe")(stripeKey);
-
       const { priceId, userId, successUrl, cancelUrl } = req.body;
 
       if (!priceId || !userId) {
@@ -24,16 +35,17 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
-        mode: "payment",
+        mode: "subscription",
         allow_promotion_codes: true,
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: successUrl,
         cancel_url: cancelUrl,
-        // 🌟 We store the ID here...
         metadata: { userId: userId }, 
       });
 
+      // Send the session URL back to the Dashboard
       res.status(200).send({ url: session.url });
+
     } catch (error) {
       console.error("Error creating session:", error);
       res.status(500).send({ error: error.message });
@@ -48,7 +60,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     
-    // 🌟 THE FIX: Look in metadata, matching where we saved it above!
+    // Look in metadata for the userId we attached in Function 1
     const userId = session.metadata ? session.metadata.userId : null; 
 
     if (userId) {

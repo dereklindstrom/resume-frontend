@@ -1,6 +1,19 @@
-export const generateResumeAPI = async (userData) => {
-  console.log("🚀 Sending data to the secure backend...");
+export const generateResumeAPI = async (userData, isPremium = false) => {
+    console.log("🚀 Sending data to the secure backend...");
   
+    let systemPrompt = `You are an expert executive resume writer. 
+  Create a professional profile based on these details: ${JSON.stringify(userData)}.`;
+ 
+  // 🌟 THE PREMIUM INJECTION
+  if (isPremium) {
+    systemPrompt += `
+    CRITICAL PREMIUM REQUIREMENT: 
+    - You MUST quantify at least 80% of the bullet points. 
+    - Use specific metrics: percentages, dollar amounts, headcount, or time-saved.
+    - If no metric is provided in the data, use your expertise to infer realistic "Power Metrics" 
+      based on the user's seniority (e.g., 'Optimized regional operations resulting in an estimated 15% efficiency gain').
+    - Focus on 'Action -> Result' formatting.`;
+  }
   try {
     const API_URL = 'https://resume-api-rr5i.onrender.com/api/generate-resume';
     

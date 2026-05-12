@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore'; 
+import { db } from './firebase';
 
 // --- PAGES & COMPONENTS ---
 import LandingPage from './LandingPage';
@@ -63,7 +65,7 @@ const ProgressBar = ({ currentStep, setStep }) => {
 };
 
 // 🔥 The Main Builder Application
-function BuilderFlow() {
+function BuilderFlow({ isPremium }) {
   const [step, setStep] = useState(1);
   const [userData, setUserData] = useState({ experienceLevel: 'Mid Level' });
   const [isGenerating, setIsGenerating] = useState(false);
@@ -115,9 +117,10 @@ function BuilderFlow() {
     }, 2500);
 
     try {
-      let aiResponse = await generateResumeAPI(finalProfile);
-      setFinalResume(aiResponse);
-    } catch (error) {
+    // Pass the premium status to the API call
+    let aiResponse = await generateResumeAPI(finalProfile, isPremium); 
+    setFinalResume(aiResponse);
+  } catch (error) {
       console.error("AI Generation failed:", error);
       alert("The AI engine took too long. Please click Regenerate.");
     } finally {
@@ -129,7 +132,9 @@ function BuilderFlow() {
   const handleRegenerate = async () => {
     setIsGenerating(true);
     try {
-      const aiResponse = await generateResumeAPI(userData);
+      // 🌟 Pass 'isPremium' here! 
+      // This tells the AI to use the Power Metrics prompt on the existing data.
+      const aiResponse = await generateResumeAPI(userData, isPremium); 
       setFinalResume(aiResponse);
     } catch (error) {
       console.error("Failed to regenerate:", error);
@@ -167,15 +172,35 @@ function BuilderFlow() {
 // 🔥 The Global App Router
 export default function App() {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+const [isPremium, setIsPremium] = useState(false); // 🌟 New state
+const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+useEffect(() => {
+  const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+    
+    if (currentUser) {
+      // 🕵️ Establish a real-time "spy" on this user's document
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setIsPremium(docSnap.data().isPremium || false);
+        }
+        setIsLoading(false); 
+      });
+
+      return () => {
+        unsubscribeDoc();
+        unsubscribeAuth();
+      };
+    } else {
+      setIsPremium(false);
       setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+    }
+  });
+
+  return () => unsubscribeAuth();
+}, []);
 
   if (isLoading) {
     return (
@@ -197,14 +222,16 @@ export default function App() {
   <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
   
   {/* 🔒 Protected Pages - Wrapped in our new Bouncer */}
-  <Route 
-    path="/builder" 
-    element={
-      <ProtectedRoute user={user} isLoading={isLoading}>
-        <BuilderFlow />
-      </ProtectedRoute>
-    } 
-  />
+ <Route 
+  path="/builder" 
+  element={
+    <ProtectedRoute user={user} isLoading={isLoading}>
+      {/* 🌟 Pass isPremium here */}
+      <BuilderFlow isPremium={isPremium} /> 
+    </ProtectedRoute>
+  } 
+/>
+
  <Route 
           path="/dashboard" 
           element={
