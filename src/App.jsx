@@ -161,7 +161,15 @@ function BuilderFlow({ isPremium }) {
                <h3 style={{ marginTop: '25px', fontSize: '22px', fontWeight: 'bold', color: '#0f172a' }}>{loadingText}</h3>
              </div>
           ) : (
-            <FinalResumeView resumeText={finalResume} userData={userData} editId={editId} onReset={() => window.location.reload()} onRegenerate={handleRegenerate} isGenerating={isGenerating} />
+            <FinalResumeView 
+        resumeText={finalResume} 
+        userData={userData} 
+        editId={editId} 
+        onReset={() => window.location.reload()} 
+        onRegenerate={handleRegenerate} 
+        isGenerating={isGenerating}
+        isPremium={isPremium} /* 🌟 THIS IS THE NEW WIRE */
+      />
           )}
         </>
       )}
