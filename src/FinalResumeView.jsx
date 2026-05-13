@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut } from 'lucide-react';
+import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock } from 'lucide-react'; // 🌟 Added Lock icon
 import { useNavigate } from 'react-router-dom';
 
 import { db, storage, auth } from './firebase'; 
@@ -7,7 +7,8 @@ import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false }) {
+// 🌟 Added isPremium to the props
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false }) {
   const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
@@ -17,6 +18,13 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     summary: "Loading profile...", skills: [], experience: [], education: {}, 
     coaching: { suggestedRoles: ["Loading..."], skillGaps: [] } 
   });
+
+  // 🌟 Define layout options and their premium status
+  const layoutOptions = [
+    { id: 'signature', name: 'Signature', isPremiumOnly: false },
+    { id: 'startup', name: 'Startup', isPremiumOnly: true },
+    { id: 'executive', name: 'Executive', isPremiumOnly: true }
+  ];
 
   useEffect(() => {
     if (!resumeText) return;
@@ -82,7 +90,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const targetRole = userData?.objective?.targetRole || "Professional Resume";
   const showEdu = userData?.experienceDetails?.showEdu || false;
   
-  // 🔥 UPGRADED: Ensure education is an array
   const staticEducation = Array.isArray(userData?.experienceDetails?.eduDetails) 
     ? userData.experienceDetails.eduDetails 
     : [];
@@ -108,12 +115,9 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     setIsPublishing(true);
     try {
       let publicMediaUrl = null;
-      
-      // 🔥 THE FIX: Tell it to grab the webcam photo (printPhotoUrl) if one was taken!
       const activeMediaUrl = printPhotoUrl || media.videoUrl || media.photoUrl;
 
       if (activeMediaUrl) {
-        // fetch() is smart enough to convert base64 webcam data into a real file blob
         const response = await fetch(activeMediaUrl);
         const blob = await response.blob();
         const fileRef = ref(storage, `media/${Date.now()}-profile`);
@@ -131,7 +135,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
         },
         design: { layout, palette },
         media: {
-           // Ensure the database knows we definitely have media now
            hasMedia: !!activeMediaUrl || media.hasMedia,
            mediaType: printPhotoUrl ? 'photo' : media.mediaType,
            shape: media.shape || 'circle',
@@ -150,7 +153,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
 
   const inputStyle = { width: '100%', background: isEditingText ? 'rgba(56, 189, 248, 0.1)' : 'transparent', border: isEditingText ? '1px dashed #38bdf8' : 'none', borderRadius: '4px', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit', padding: isEditingText ? '4px 8px' : '0', outline: 'none', resize: 'vertical', boxSizing: 'border-box' };
 
-  // 🔥 CLEANED UP MEDIA RENDERER
   const RenderMedia = () => {
     if (!media.hasMedia || media.mediaType === 'none') return null;
     const width = media.shape === 'circle' ? '180px' : '160px'; 
@@ -160,7 +162,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       <div className={`video-module-print-hide ${pdfAction === 'remove' ? 'pdf-remove-shape' : ''}`} style={{ textAlign: 'center', marginBottom: layout === 'startup' ? '0' : '40px', position: 'relative', display: 'inline-block' }}>
         <div style={{ position: 'relative', width, height, borderRadius, overflow: 'hidden', margin: '0 auto', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', backgroundColor: '#000', border: `3px solid var(--accent)`, zIndex: 1 }}>
           {media.mediaType === 'video' && <video className="web-video" src={media.videoUrl || media.publicUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-{(printPhotoUrl || media.mediaType === 'photo') && <img className={media.mediaType === 'video' ? "print-photo" : ""} src={printPhotoUrl || media.photoUrl || media.publicUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+          {(printPhotoUrl || media.mediaType === 'photo') && <img className={media.mediaType === 'video' ? "print-photo" : ""} src={printPhotoUrl || media.photoUrl || media.publicUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
       </div>
     );
@@ -271,9 +273,10 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
 
             {/* RIGHT: Document-Specific Actions (Prominent Buttons) */}
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={onRegenerate} disabled={isGenerating} style={{ padding: '10px 20px', backgroundColor: 'transparent', border: '1px solid #f59e0b', color: '#fbbf24', borderRadius: '8px', cursor: isGenerating ? 'not-allowed' : 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', opacity: isGenerating ? 0.5 : 1 }}>
+              {/* 🌟 UPGRADED: Regenerate button highlights Power Metrics if Premium */}
+              <button onClick={onRegenerate} disabled={isGenerating} style={{ padding: '10px 20px', backgroundColor: isPremium ? 'rgba(245, 158, 11, 0.1)' : 'transparent', border: '1px solid #f59e0b', color: '#fbbf24', borderRadius: '8px', cursor: isGenerating ? 'not-allowed' : 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', opacity: isGenerating ? 0.5 : 1 }}>
                 <RefreshCw size={16} className={isGenerating ? "spin-animation" : ""} /> 
-                {isGenerating ? 'Drafting...' : 'Regenerate'}
+                {isGenerating ? 'Drafting...' : (isPremium ? '✨ Power Regenerate' : 'Regenerate')}
               </button>
               <style>{`.spin-animation { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
               
@@ -296,9 +299,39 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   <div className="no-print" style={{ backgroundColor: '#1e293b', padding: '15px 30px', display: 'flex', gap: '30px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div>
               <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><LayoutTemplate size={12}/> Template</span>
+              
+              {/* 🌟 UPGRADED: Dynamic Layout Buttons with Premium Paywall */}
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                {['signature', 'startup', 'executive'].map(l => ( <button key={l} onClick={() => setLayout(l)} style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: layout === l ? '#38bdf8' : '#0f172a', color: layout === l ? '#0f172a' : '#cbd5e1', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>{l.charAt(0).toUpperCase() + l.slice(1)}</button> ))}
+                {layoutOptions.map(l => ( 
+                  <button 
+                    key={l.id} 
+                    onClick={() => {
+                      if (l.isPremiumOnly && !isPremium) {
+                        alert("🌟 This is a Premium layout! Upgrade to unlock the Executive and Startup templates.");
+                        return;
+                      }
+                      setLayout(l.id);
+                    }} 
+                    style={{ 
+                      padding: '6px 12px', 
+                      fontSize: '13px', 
+                      backgroundColor: layout === l.id ? '#38bdf8' : '#0f172a', 
+                      color: layout === l.id ? '#0f172a' : '#cbd5e1', 
+                      border: 'none', 
+                      borderRadius: '6px', 
+                      cursor: 'pointer', 
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      opacity: (l.isPremiumOnly && !isPremium) ? 0.6 : 1
+                    }}>
+                      {l.name}
+                      {l.isPremiumOnly && !isPremium && <Lock size={12} color="#94a3b8" />}
+                    </button> 
+                ))}
               </div>
+
             </div>
             <div>
               <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><Palette size={12}/> Palette</span>

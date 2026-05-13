@@ -5,8 +5,8 @@ export const generateResumeAPI = async (userData, isPremium = false) => {
   Create a professional profile based on these details: ${JSON.stringify(userData)}.`;
  
   // 🌟 THE PREMIUM INJECTION
-  if (isPremium) {
-    systemPrompt += `
+  if (isPremium === true) {
+      prompt += `
     CRITICAL PREMIUM REQUIREMENT: 
     - You MUST quantify at least 80% of the bullet points. 
     - Use specific metrics: percentages, dollar amounts, headcount, or time-saved.
