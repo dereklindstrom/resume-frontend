@@ -193,10 +193,28 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
             .layout-signature { display: grid !important; grid-template-columns: 200px 1fr !important; gap: 20px !important; } .sidebar-rail, .main-content { padding: 0 !important; background: transparent !important; border: none !important; }
             .name-header { font-size: 28pt !important; margin-bottom: 2px !important; line-height: 1 !important; } .title-header { font-size: 12pt !important; margin-bottom: 12px !important; } .section-title { font-size: 10pt !important; margin-bottom: 8px !important; padding-bottom: 4px !important; }
             p, span, li, .metrics-list { font-size: 9.5pt !important; line-height: 1.3 !important; }
-            .job-item { margin-bottom: 12px !important; page-break-inside: avoid !important; break-inside: avoid !important; } .experience-header { margin-bottom: 2px !important; } .experience-header h4 { font-size: 11pt !important; }
-            .metrics-toggle summary { display: none !important; } .metrics-toggle { background: transparent !important; border: none !important; padding: 0 !important; } .metrics-list { display: block !important; margin-top: 4px !important; padding-left: 15px !important; }
-            h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !important; } .web-video { display: none !important; } .print-photo { display: block !important; } .pdf-remove-shape { display: none !important; }
-            .video-module-print-hide > div { width: 120px !important; height: 120px !important; border-width: 2px !important; } input, textarea { border: none !important; background: transparent !important; resize: none !important; padding: 0 !important; }
+            /* 🌟 THE PDF BREAK FIXES */
+.job-item { 
+  margin-bottom: 20px !important; 
+  page-break-inside: avoid !important; 
+  break-inside: avoid !important; 
+  display: block !important; /* Forces the browser to respect the break */
+  position: relative !important;
+} 
+.experience-header, .section-title { 
+  margin-bottom: 4px !important; 
+  page-break-after: avoid !important; 
+  break-after: avoid !important; 
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+} 
+.experience-header h4 { font-size: 11pt !important; }
+.metrics-toggle summary { display: none !important; } 
+.metrics-toggle { background: transparent !important; border: none !important; padding: 0 !important; display: block !important; } 
+.metrics-list { display: block !important; margin-top: 4px !important; padding-left: 15px !important; }
+h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !important; }
+/* Prevent the skills container from breaking awkwardly */
+.skills-container { page-break-inside: avoid !important; break-inside: avoid !important; display: block !important; }.video-module-print-hide > div { width: 120px !important; height: 120px !important; border-width: 2px !important; } input, textarea { border: none !important; background: transparent !important; resize: none !important; padding: 0 !important; }
           }
           @media screen { .print-photo { display: none !important; } .web-video { display: block !important; } }
         `}
