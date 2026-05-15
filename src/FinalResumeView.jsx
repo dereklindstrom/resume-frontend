@@ -8,8 +8,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
 // 🌟 Added isPremium to the props
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false }) {
-  const [activeView, setActiveView] = useState('resume'); 
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free' }) {  const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
   // 🌟 NEW: Advanced Theme State
@@ -443,45 +442,76 @@ h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !importa
 
         {/* 🧠 COACHING DASHBOARD VIEW */}
         {activeView === 'coaching' && (
-          <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', padding: '60px', borderRadius: '0 0 16px 16px', minHeight: '850px' }}>
-            <h2 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '10px', color: '#8b5cf6', display: 'flex', alignItems: 'center', gap: '15px' }}><BrainCircuit size={36} /> Post-Generation Analysis</h2>
-            <p style={{ fontSize: '18px', color: '#94a3b8', marginBottom: '50px' }}>Based on your experiences and your target role of <strong>{targetRole}</strong>, our AI engine has identified key opportunities for your career progression.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-              <div style={{ backgroundColor: '#1e293b', padding: '30px', borderRadius: '16px', border: '1px solid #334155' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#38bdf8', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={20} /> High-Probability Role Matches</h3>
-                <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>Your metrics and leadership history strongly align with these specific job titles. You should actively search for these terms:</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {editableData.coaching?.suggestedRoles?.map((role, idx) => ( <div key={idx} style={{ backgroundColor: '#0f172a', padding: '16px', borderRadius: '8px', fontSize: '16px', fontWeight: '600', borderLeft: '4px solid #38bdf8' }}>{role}</div> ))}
+          <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', padding: '60px', borderRadius: '0 0 16px 16px', minHeight: '850px', position: 'relative', overflow: 'hidden' }}>
+            
+            {/* 🛑 THE BLUR PAYWALL (For Free & Basic Tiers) */}
+            {['free', 'basic'].includes(subscriptionTier) && (
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', backgroundColor: 'rgba(15, 23, 42, 0.6)' }}>
+                <div style={{ backgroundColor: '#1e293b', padding: '50px', borderRadius: '24px', textAlign: 'center', maxWidth: '500px', border: '1px solid #334155', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+                  <Lock size={48} color="#38bdf8" style={{ margin: '0 auto 20px auto' }} />
+                  <h3 style={{ fontSize: '28px', fontWeight: '800', color: '#f8fafc', margin: '0 0 16px 0' }}>Unlock Career Coaching</h3>
+                  <p style={{ fontSize: '16px', color: '#cbd5e1', marginBottom: '32px', lineHeight: '1.6' }}>Upgrade to a <strong>Pro</strong> or <strong>Executive</strong> plan to reveal your high-probability role matches and critical skill gap analysis.</p>
+                  <button onClick={() => navigate('/dashboard')} style={{ padding: '14px 28px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', width: '100%', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)' }}>
+                    View Upgrade Plans
+                  </button>
                 </div>
               </div>
-              <div style={{ backgroundColor: '#1e293b', padding: '30px', borderRadius: '16px', border: '1px solid #334155' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#f43f5e', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertCircle size={20} /> Critical Skill Gaps</h3>
-                <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>To secure a high-end <strong>{targetRole}</strong> position, you should quickly acquire or emphasize these missing competencies:</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {editableData.coaching?.skillGaps?.map((gap, idx) => (
-                    <div key={idx} style={{ backgroundColor: '#0f172a', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #f43f5e' }}>
-                      <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#f8fafc', margin: '0 0 8px 0' }}>{gap.skill}</h4>
-                      <p style={{ fontSize: '14px', color: '#94a3b8', margin: '0 0 16px 0', lineHeight: '1.5' }}>{gap.reason}</p>
-                      
-                      {/* 🔥 NEW: Free vs Premium Learning Paths */}
-                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        {/* The Free Option */}
-                        <div style={{ backgroundColor: '#064e3b', color: '#34d399', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #047857' }}>
-                          <span style={{ backgroundColor: '#10b981', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>FREE</span>
-                          {gap.freeResource || "Coursera Audit"}
-                        </div>
-                        {/* The Premium Option */}
-                        <div style={{ backgroundColor: '#1e3a8a', color: '#60a5fa', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #1d4ed8' }}>
-                          <span style={{ backgroundColor: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>PREMIUM</span>
-                          {gap.paidResource || "Industry Certification"}
-                        </div>
-                      </div>
+            )}
 
-                    </div>
-                  ))}
+            {/* 📄 THE COACHING CONTENT (Blurred if behind paywall) */}
+            <div style={{ filter: ['free', 'basic'].includes(subscriptionTier) ? 'blur(8px)' : 'none', opacity: ['free', 'basic'].includes(subscriptionTier) ? 0.4 : 1, pointerEvents: ['free', 'basic'].includes(subscriptionTier) ? 'none' : 'auto', transition: 'all 0.3s ease' }}>
+              <h2 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '10px', color: '#8b5cf6', display: 'flex', alignItems: 'center', gap: '15px' }}><BrainCircuit size={36} /> Post-Generation Analysis</h2>
+              <p style={{ fontSize: '18px', color: '#94a3b8', marginBottom: '50px' }}>Based on your experiences and your target role of <strong>{targetRole}</strong>, our AI engine has identified key opportunities for your career progression.</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+                
+                {/* ROLE MATCHES */}
+                <div style={{ backgroundColor: '#1e293b', padding: '30px', borderRadius: '16px', border: '1px solid #334155' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#38bdf8', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={20} /> High-Probability Role Matches</h3>
+                  <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>Your metrics and leadership history strongly align with these specific job titles. You should actively search for these terms:</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {editableData.coaching?.suggestedRoles?.map((role, idx) => ( 
+                      <div key={idx} style={{ backgroundColor: '#0f172a', padding: '16px', borderRadius: '8px', fontSize: '16px', fontWeight: '600', borderLeft: '4px solid #38bdf8' }}>{role}</div> 
+                    ))}
+                  </div>
                 </div>
+
+                {/* SKILL GAPS */}
+                <div style={{ backgroundColor: '#1e293b', padding: '30px', borderRadius: '16px', border: '1px solid #334155' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#f43f5e', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}><AlertCircle size={20} /> Critical Skill Gaps</h3>
+                  <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '20px' }}>To secure a high-end <strong>{targetRole}</strong> position, you should quickly acquire or emphasize these missing competencies:</p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {editableData.coaching?.skillGaps?.map((gap, idx) => (
+                      <div key={idx} style={{ backgroundColor: '#0f172a', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #f43f5e' }}>
+                        <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#f8fafc', margin: '0 0 8px 0' }}>{gap.skill}</h4>
+                        <p style={{ fontSize: '14px', color: '#94a3b8', margin: '0 0 16px 0', lineHeight: '1.5' }}>{gap.reason}</p>
+                        
+                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                          {/* Free Resource (Available to Pro & Exec) */}
+                          <div style={{ backgroundColor: '#064e3b', color: '#34d399', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #047857' }}>
+                            <span style={{ backgroundColor: '#10b981', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>FREE</span>
+                            {gap.freeResource || "Coursera Audit"}
+                          </div>
+                          
+                          {/* 🌟 EXECUTIVE UPSELL: Premium Learning Paths */}
+                          {subscriptionTier === 'executive' ? (
+                            <div style={{ backgroundColor: '#1e3a8a', color: '#60a5fa', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #1d4ed8' }}>
+                              <span style={{ backgroundColor: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>PREMIUM</span>
+                              {gap.paidResource || "Industry Certification"}
+                            </div>
+                          ) : (
+                            <div onClick={() => navigate('/dashboard')} style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px dashed #475569', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}>
+                              <Lock size={12} /> Executive Tier Path
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>

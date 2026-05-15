@@ -65,7 +65,7 @@ const ProgressBar = ({ currentStep, setStep }) => {
 };
 
 // 🔥 The Main Builder Application
-function BuilderFlow({ isPremium }) { 
+function BuilderFlow({ isPremium, subscriptionTier }) { 
   const [step, setStep] = useState(1);
   const [userData, setUserData] = useState({ experienceLevel: 'Mid Level' });
   const [isGenerating, setIsGenerating] = useState(false);
@@ -152,6 +152,7 @@ function BuilderFlow({ isPremium }) {
       {step === 4 && <ObjectiveForm workHistory={userData.experienceDetails?.workHistory} savedData={userData.objective} onComplete={handleObjectiveComplete} onBack={() => setStep(3)} />}
       {step === 5 && <BehavioralQuestions onComplete={handleStoriesComplete} onBack={() => setStep(step - 1)} />}
       {step === 6 && <VideoStep onComplete={handleVideoComplete} onBack={() => setStep(step - 1)} />}
+      
       {step === 7 && (
         <>
           {isGenerating ? (
@@ -162,14 +163,15 @@ function BuilderFlow({ isPremium }) {
              </div>
           ) : (
             <FinalResumeView 
-        resumeText={finalResume} 
-        userData={userData} 
-        editId={editId} 
-        onReset={() => window.location.reload()} 
-        onRegenerate={handleRegenerate} 
-        isGenerating={isGenerating}
-        isPremium={isPremium} /* 🌟 THIS IS THE NEW WIRE */
-      />
+              resumeText={finalResume} 
+              userData={userData} 
+              editId={editId} 
+              onReset={() => window.location.reload()} 
+              onRegenerate={handleRegenerate} 
+              isGenerating={isGenerating}
+              isPremium={isPremium} 
+              subscriptionTier={subscriptionTier} /* 🌟 The crucial new wire */
+            />
           )}
         </>
       )}
@@ -180,35 +182,40 @@ function BuilderFlow({ isPremium }) {
 // 🔥 The Global App Router
 export default function App() {
   const [user, setUser] = useState(null);
-const [isPremium, setIsPremium] = useState(false); // 🌟 New state
-const [isLoading, setIsLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  // 🌟 1. Add this new state line:
+  const [subscriptionTier, setSubscriptionTier] = useState('free'); 
+  const [isLoading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-    setUser(currentUser);
-    
-    if (currentUser) {
-      // 🕵️ Establish a real-time "spy" on this user's document
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          setIsPremium(docSnap.data().isPremium || false);
-        }
-        setIsLoading(false); 
-      });
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setIsPremium(data.isPremium || false);
+            // 🌟 2. Tell the app to listen for the specific tier!
+            setSubscriptionTier(data.subscriptionTier || (data.isPremium ? 'pro' : 'free'));
+          }
+          setIsLoading(false); 
+        });
 
-      return () => {
-        unsubscribeDoc();
-        unsubscribeAuth();
-      };
-    } else {
-      setIsPremium(false);
-      setIsLoading(false);
-    }
-  });
+        return () => {
+          unsubscribeDoc();
+          unsubscribeAuth();
+        };
+      } else {
+        setIsPremium(false);
+        setSubscriptionTier('free'); // Reset on logout
+        setIsLoading(false);
+      }
+    });
 
-  return () => unsubscribeAuth();
-}, []);
+    return () => unsubscribeAuth();
+  }, []);
 
   if (isLoading) {
     return (
@@ -231,14 +238,14 @@ useEffect(() => {
   
   {/* 🔒 Protected Pages - Wrapped in our new Bouncer */}
  <Route 
-  path="/builder" 
-  element={
-    <ProtectedRoute user={user} isLoading={isLoading}>
-      {/* 🌟 This is where the magic happens */}
-      <BuilderFlow isPremium={isPremium} /> 
-    </ProtectedRoute>
-  } 
-/>
+    path="/builder" 
+    element={
+      <ProtectedRoute user={user} isLoading={isLoading}>
+        {/* 🌟 Pass the new tier state into the BuilderFlow */}
+        <BuilderFlow isPremium={isPremium} subscriptionTier={subscriptionTier} /> 
+      </ProtectedRoute>
+    } 
+  />
 
  <Route 
           path="/dashboard" 
