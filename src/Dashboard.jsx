@@ -223,17 +223,49 @@ export default function Dashboard() {
               </div>
             ) : (
               resumes.map((resume) => (
-                <div key={resume.id} onClick={() => navigate('/builder', { state: { editData: resume } })} style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', cursor: 'pointer', position: 'relative' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ width: '40px', height: '40px', backgroundColor: '#eff6ff', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                       <Briefcase size={20} color="#3b82f6" />
-                    </div>
-                    <button onClick={(e) => handleDelete(e, resume.id)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }}><Trash2 size={16} /></button>
-                  </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: '700', marginTop: '16px' }}>{resume.userData?.objective?.targetRole || "Untitled Profile"}</h3>
-                  <p style={{ color: '#64748b', fontSize: '14px' }}>{new Date(resume.createdAt).toLocaleDateString()}</p>
-                </div>
-              ))
+  <div 
+    key={resume.id} 
+    onClick={() => navigate('/builder', { state: { editData: resume } })}
+    style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', cursor: 'pointer', transition: 'all 0.2s', position: 'relative', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}
+    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0,0,0,0.05)'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'; }}
+  >
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+      {resume.media?.hasMedia && resume.media?.publicUrl ? (
+        <img 
+          src={resume.media.publicUrl} 
+          alt="Profile" 
+          style={{ width: '50px', height: '50px', borderRadius: resume.media.shape === 'circle' ? '50%' : '8px', objectFit: 'cover', border: '2px solid #e2e8f0' }} 
+        />
+      ) : (
+        <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #cbd5e1' }}>
+          <Briefcase size={20} color="#94a3b8" />
+        </div>
+      )}
+      
+      <button onClick={(e) => handleDelete(e, resume.id)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '4px' }} title="Delete">
+        <Trash2 size={16} />
+      </button>
+    </div>
+
+    <div style={{ backgroundColor: '#eff6ff', color: '#3b82f6', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+        <Target size={12} /> {resume.userData?.objective?.targetIndustry || "General"}
+    </div>
+    
+    <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', lineHeight: '1.3' }}>
+      {resume.userData?.objective?.targetRole || "Executive Professional"}
+    </h3>
+    
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>
+      {resume.userData?.baseline?.name || "Anonymous Profile"}
+    </div>
+    
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #f1f5f9', color: '#94a3b8', fontSize: '12px', fontWeight: '500' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12} /> {new Date(resume.createdAt).toLocaleDateString()}</span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={12} /> {resume.design?.layout || "signature"}</span>
+    </div>
+  </div>
+))
             )}
           </div>
         )}
