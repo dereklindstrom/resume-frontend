@@ -22,10 +22,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     font: '"Plus Jakarta Sans", sans-serif'
   });
 
-  // Helper to figure out which colors to actually render
-  const appliedColors = themeMode === 'custom' ? customTheme : palettes[palette];
-  const appliedFont = themeMode === 'custom' ? customTheme.font : (typography[layout]?.font || typography.signature.font);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   
   const [editableData, setEditableData] = useState({ 
     summary: "Loading profile...", skills: [], experience: [], education: {}, 
@@ -110,8 +107,13 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const media = userData?.media || { hasMedia: false, mediaType: 'none' };
 
   const palettes = { cobalt: { primary: '#1e3a8a', accent: '#3b82f6', bg: '#ffffff', sidebar: '#f8fafc', text: '#334155' }, sage: { primary: '#2f3e46', accent: '#52796f', bg: '#ffffff', sidebar: '#cad2c5', text: '#354f52' }, terracotta: { primary: '#780000', accent: '#c1121f', bg: '#fffdf7', sidebar: '#fdf0d5', text: '#333333' }, midnight: { primary: '#f8fafc', accent: '#38bdf8', bg: '#0f172a', sidebar: '#1e293b', text: '#cbd5e1' }, monochrome: { primary: '#171717', accent: '#737373', bg: '#ffffff', sidebar: '#fafafa', text: '#404040' } };
-  const activeColors = palettes[palette];
   const typography = { signature: { font: '"Plus Jakarta Sans", sans-serif', nameWeight: 800, headingStyle: 'uppercase' }, startup: { font: '"Outfit", sans-serif', nameWeight: 600, headingStyle: 'capitalize' }, executive: { font: '"Playfair Display", serif', nameWeight: 700, headingStyle: 'uppercase' } };
+   
+  const appliedColors = themeMode === 'custom' ? customTheme : palettes[palette];
+  const appliedFont = themeMode === 'custom' ? customTheme.font : (typography[layout]?.font || typography.signature.font);
+
+  const activeColors = palettes[palette];
+ 
   const activeTypo = typography[layout] || typography.signature;
 
   const updateExperience = (index, field, value) => { const newExp = [...editableData.experience]; newExp[index][field] = value; setEditableData({ ...editableData, experience: newExp }); };
