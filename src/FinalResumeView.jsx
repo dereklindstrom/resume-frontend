@@ -12,6 +12,19 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
+  // 🌟 NEW: Advanced Theme State
+  const [themeMode, setThemeMode] = useState('preset'); // 'preset' or 'custom'
+  const [customTheme, setCustomTheme] = useState({
+    primary: '#1e3a8a',
+    accent: '#3b82f6',
+    bg: '#ffffff',
+    text: '#334155',
+    font: '"Plus Jakarta Sans", sans-serif'
+  });
+
+  // Helper to figure out which colors to actually render
+  const appliedColors = themeMode === 'custom' ? customTheme : palettes[palette];
+  const appliedFont = themeMode === 'custom' ? customTheme.font : (typography[layout]?.font || typography.signature.font);
   const navigate = useNavigate();
   
   const [editableData, setEditableData] = useState({ 
@@ -173,7 +186,24 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
-          .resume-container { --primary: ${activeColors.primary}; --accent: ${activeColors.accent}; --bg: ${activeColors.bg}; --sidebar: ${activeColors.sidebar}; --text: ${activeColors.text}; --font: ${activeTypo.font}; font-family: var(--font); background: var(--bg); color: var(--text); border-radius: 0 0 16px 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); min-height: 850px; display: flex; flex-direction: column; }
+          .resume-container { 
+  --primary: ${appliedColors.primary}; 
+  --accent: ${appliedColors.accent}; 
+  --bg: ${appliedColors.bg}; 
+  /* Fallback sidebar color if custom, otherwise use preset sidebar */
+  --sidebar: ${themeMode === 'custom' ? appliedColors.bg : appliedColors.sidebar}; 
+  --text: ${appliedColors.text}; 
+  --font: ${appliedFont}; 
+  
+  font-family: var(--font); 
+  background: var(--bg); 
+  color: var(--text); 
+  border-radius: 0 0 16px 16px; 
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+  min-height: 850px; 
+  display: flex; 
+  flex-direction: column; 
+}
           .resume-container h1, .resume-container h2, .resume-container h3, .resume-container h4, .resume-container p { margin: 0; }
           .sidebar-rail { background: var(--sidebar); padding: 50px 40px; border-right: 1px solid rgba(0,0,0,0.05); } .main-content { padding: 60px; flex: 1; text-align: left; }
           .layout-signature { flex-direction: row; } .layout-signature .sidebar-rail { flex: 0 0 320px; max-width: 320px; } .layout-signature .main-content { flex: 1; max-width: none; }
@@ -313,52 +343,101 @@ h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !importa
 
 )}
         {/* --- SECONDARY CONTROL BAR --- */}
-        {!isPublicView && activeView === 'resume' && (
-  <div className="no-print" style={{ backgroundColor: '#1e293b', padding: '15px 30px', display: 'flex', gap: '30px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-            <div>
-              <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><LayoutTemplate size={12}/> Template</span>
-              
-              {/* 🌟 UPGRADED: Dynamic Layout Buttons with Premium Paywall */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                {layoutOptions.map(l => ( 
-                  <button 
-                    key={l.id} 
-                    onClick={() => {
-                      if (l.isPremiumOnly && !isPremium) {
-                        alert("🌟 This is a Premium layout! Upgrade to unlock the Executive and Startup templates.");
-                        return;
-                      }
-                      setLayout(l.id);
-                    }} 
-                    style={{ 
-                      padding: '6px 12px', 
-                      fontSize: '13px', 
-                      backgroundColor: layout === l.id ? '#38bdf8' : '#0f172a', 
-                      color: layout === l.id ? '#0f172a' : '#cbd5e1', 
-                      border: 'none', 
-                      borderRadius: '6px', 
-                      cursor: 'pointer', 
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      opacity: (l.isPremiumOnly && !isPremium) ? 0.6 : 1
-                    }}>
-                      {l.name}
-                      {l.isPremiumOnly && !isPremium && <Lock size={12} color="#94a3b8" />}
-                    </button> 
-                ))}
-              </div>
+{!isPublicView && activeView === 'resume' && (
+  <div className="no-print" style={{ backgroundColor: '#1e293b', padding: '20px 30px', display: 'flex', gap: '30px', flexWrap: 'wrap', borderBottom: '1px solid rgba(255,255,255,0.05)', alignItems: 'flex-start' }}>
+    
+    {/* EXISTING TEMPLATE SELECTOR */}
+    <div>
+      <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><LayoutTemplate size={12}/> Template</span>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+        {layoutOptions.map(l => ( 
+          <button 
+            key={l.id} 
+            onClick={() => setLayout(l.id)} 
+            style={{ padding: '6px 12px', fontSize: '13px', backgroundColor: layout === l.id ? '#38bdf8' : '#0f172a', color: layout === l.id ? '#0f172a' : '#cbd5e1', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+          >
+            {l.name}
+          </button> 
+        ))}
+      </div>
+    </div>
 
+    {/* THEME MODE TOGGLE */}
+    <div style={{ borderLeft: '1px solid #334155', paddingLeft: '30px' }}>
+      <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><Palette size={12}/> Color Mode</span>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', backgroundColor: '#0f172a', padding: '4px', borderRadius: '8px' }}>
+        <button onClick={() => setThemeMode('preset')} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'preset' ? '#334155' : 'transparent', color: themeMode === 'preset' ? '#fff' : '#94a3b8' }}>Presets</button>
+        <button 
+          onClick={() => {
+            if (isPremium) {
+              setThemeMode('custom');
+            } else {
+              alert("🌟 Advanced styling is a Pro feature. Please upgrade your tier!");
+            }
+          }} 
+          style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'custom' ? '#38bdf8' : 'transparent', color: themeMode === 'custom' ? '#0f172a' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}
+        >
+          Custom {!isPremium && <Lock size={12} />}
+        </button>
+      </div>
+    </div>
+
+    {/* DYNAMIC DESIGN CONTROLS */}
+    {themeMode === 'preset' ? (
+      // PRESET MODE (Free for all)
+      <div>
+        <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Quick Palettes</span>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {Object.keys(palettes).map(p => ( 
+            <button key={p} onClick={() => setPalette(p)} style={{ width: '28px', height: '28px', backgroundColor: palettes[p].primary, border: palette === p ? '3px solid #38bdf8' : '3px solid transparent', borderRadius: '50%', cursor: 'pointer' }} title={p} /> 
+          ))}
+        </div>
+      </div>
+    ) : (
+      // CUSTOM MODE (Pro/Exec Only)
+      <div style={{ display: 'flex', gap: '20px', backgroundColor: '#0f172a', padding: '10px 15px', borderRadius: '8px', border: '1px solid #38bdf8' }}>
+        
+        {/* Custom Colors */}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {[
+            { key: 'primary', label: 'Primary' },
+            { key: 'accent', label: 'Accent' },
+            { key: 'text', label: 'Text' },
+            { key: 'bg', label: 'Background' }
+          ].map(colorDef => (
+            <div key={colorDef.key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={{ fontSize: '10px', color: '#94a3b8' }}>{colorDef.label}</span>
+              <input 
+                type="color" 
+                value={customTheme[colorDef.key]} 
+                onChange={(e) => setCustomTheme({...customTheme, [colorDef.key]: e.target.value})}
+                style={{ width: '30px', height: '30px', padding: '0', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: 'transparent' }}
+              />
             </div>
-            <div>
-              <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><Palette size={12}/> Palette</span>
-              <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-                {Object.keys(palettes).map(p => ( <button key={p} onClick={() => setPalette(p)} style={{ width: '28px', height: '28px', backgroundColor: palettes[p].primary, border: palette === p ? '3px solid #38bdf8' : '3px solid transparent', borderRadius: '50%', cursor: 'pointer' }} title={p} /> ))}
-              </div>
-            </div>
-          </div>
-        )}
+          ))}
+        </div>
+
+        <div style={{ width: '1px', backgroundColor: '#334155' }}></div>
+
+        {/* Custom Fonts */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span style={{ fontSize: '10px', color: '#94a3b8' }}>Typography</span>
+          <select 
+            value={customTheme.font}
+            onChange={(e) => setCustomTheme({...customTheme, font: e.target.value})}
+            style={{ backgroundColor: '#1e293b', color: '#cbd5e1', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '13px', outline: 'none' }}
+          >
+            <option value='"Plus Jakarta Sans", sans-serif'>Plus Jakarta (Modern)</option>
+            <option value='"Outfit", sans-serif'>Outfit (Tech)</option>
+            <option value='"Playfair Display", serif'>Playfair (Executive)</option>
+            <option value='"Inter", sans-serif'>Inter (Clean)</option>
+            <option value='"Courier New", monospace'>Courier (Code)</option>
+          </select>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
         {/* 🧠 COACHING DASHBOARD VIEW */}
         {activeView === 'coaching' && (
