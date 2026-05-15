@@ -7,11 +7,8 @@ const db = admin.firestore();
 
 // 🚀 FUNCTION 1: Create the Checkout Page
 exports.createStripeCheckout = functions.https.onRequest((req, res) => {
-  // 🔥 This handles the "Preflight" check (OPTIONS request) from the browser
   return cors(req, res, async () => {
     try {
-      // 1. EXPLICIT CORS HANDSHAKE:
-      // If the browser is just "pinging" to check security, we respond with a green light immediately.
       if (req.method === 'OPTIONS') {
         res.set('Access-Control-Allow-Origin', '*');
         res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -19,7 +16,6 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
         return res.status(204).send('');
       }
 
-      // 2. STRIPE LOGIC:
       const stripeKey = process.env.STRIPE_SECRET_KEY;
       if (!stripeKey) {
         console.error("Missing Stripe Key!");
@@ -27,23 +23,28 @@ exports.createStripeCheckout = functions.https.onRequest((req, res) => {
       }
       
       const stripe = require("stripe")(stripeKey);
-      const { priceId, userId, successUrl, cancelUrl } = req.body;
+      
+      // 🌟 NEW: We are now accepting a 'tier' variable from your frontend
+      const { priceId, userId, successUrl, cancelUrl, tier } = req.body;
 
-      if (!priceId || !userId) {
-        return res.status(400).send({ error: "Missing required parameters." });
+      if (!priceId || !userId || !tier) {
+        return res.status(400).send({ error: "Missing required parameters (priceId, userId, or tier)." });
       }
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
-        mode: "subscription",
+        mode: "subscription", // Keep this if your prices in Stripe are recurring
         allow_promotion_codes: true,
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: successUrl,
         cancel_url: cancelUrl,
-        metadata: { userId: userId }, 
+        // 🌟 THE STICKY NOTE: We pass the tier to Stripe here
+        metadata: { 
+          userId: userId,
+          tier: tier 
+        }, 
       });
 
-      // Send the session URL back to the Dashboard
       res.status(200).send({ url: session.url });
 
     } catch (error) {
@@ -60,17 +61,20 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     
-    // Look in metadata for the userId we attached in Function 1
+    // 🌟 Read the sticky note!
     const userId = session.metadata ? session.metadata.userId : null; 
+    const purchasedTier = session.metadata ? session.metadata.tier : 'basic'; 
 
     if (userId) {
       try {
         await db.collection("users").doc(userId).set({
-          isPremium: true,
+          isPremium: true, // We'll keep this as a quick master switch just in case
+          subscriptionTier: purchasedTier, // 🌟 'basic', 'pro', or 'executive'
           subscriptionDate: admin.firestore.FieldValue.serverTimestamp(),
           stripeSessionId: session.id
         }, { merge: true });
-        console.log(`Successfully upgraded user: ${userId}`);
+        
+        console.log(`Successfully upgraded user: ${userId} to ${purchasedTier} tier`);
       } catch (error) {
         console.error("Firestore Update Error:", error);
       }
@@ -78,5 +82,6 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
       console.error("No userId found in session metadata.");
     }
   }
+  
   res.status(200).send("Webhook received");
 });
