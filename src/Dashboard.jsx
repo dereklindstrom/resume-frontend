@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from './firebase';
-import { collection, query, where, getDocs, deleteDoc, doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
+import { collection, query, where, getDocs, deleteDoc, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore'; // 🌟 Added updateDocimport { signOut } from 'firebase/auth';
 import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star, Check, X } from 'lucide-react';
 
 // 🌟 STEP 1: Define your Stripe Price IDs here
@@ -69,6 +68,17 @@ export default function Dashboard() {
     try {
       const priceId = STRIPE_PRICES[selectedTier];
       
+      // 🛠️ DEV MODE TOGGLE
+  const forceTierChange = async (newTier) => {
+    try {
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userRef, { subscriptionTier: newTier });
+      // The onSnapshot listener will automatically catch this and update the UI!
+    } catch (error) {
+      console.error("Failed to update tier:", error);
+    }
+  };
+
       const response = await fetch("https://createstripecheckout-u4ujgfkbxa-uc.a.run.app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -190,6 +200,25 @@ export default function Dashboard() {
           </button>
         </div>
       </nav>
+
+<div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          
+          {/* 🛠️ SECRET DEV TOGGLE (Remove before launching to public!) */}
+          <select 
+            value={subscriptionTier} 
+            onChange={(e) => forceTierChange(e.target.value)}
+            style={{ padding: '6px', borderRadius: '4px', backgroundColor: '#fef08a', border: '1px solid #eab308', color: '#854d0e', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+          >
+            <option value="free">Dev: Free</option>
+            <option value="basic">Dev: Basic</option>
+            <option value="pro">Dev: Pro</option>
+            <option value="executive">Dev: Exec</option>
+          </select>
+
+          <button onClick={handleSignOut} style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <LogOut size={16} /> Sign Out
+          </button>
+        </div>
 
       {/* REST OF DASHBOARD CONTENT (STAYS THE SAME) */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 5%' }}>
