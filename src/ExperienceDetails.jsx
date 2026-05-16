@@ -1,203 +1,212 @@
 import { useState } from 'react';
+import { Briefcase, GraduationCap, Plus, Trash2, ArrowRight, ArrowLeft, Image as ImageIcon, Video, Lock } from 'lucide-react';
 
-export default function ExperienceDetails({ level, savedData, onComplete, onBack }) {
-  
+// 🌟 1. Added subscriptionTier to props
+export default function ExperienceDetails({ level, savedData, onComplete, onBack, subscriptionTier = 'free' }) {
   const [workHistory, setWorkHistory] = useState(
-    savedData?.workHistory || [
-      { id: Date.now(), company: '', jobTitle: '', startDate: '', endDate: '', responsibilities: '', achievements: '' }
-    ]
+    savedData?.workHistory || [{ company: '', title: '', dates: '', description: '', media: [] }]
   );
- 
-  const isGrad = level === 'grad';
-
-  const [showEdu, setShowEdu] = useState(savedData?.showEdu || false);
   
-  // 🔥 UPGRADED: Education is now an array so they can add multiple!
   const [eduDetails, setEduDetails] = useState(
-    savedData?.eduDetails && Array.isArray(savedData.eduDetails) 
-      ? savedData.eduDetails 
-      : [{ id: Date.now(), school: '', degree: '' }]
+    savedData?.eduDetails || [{ school: '', degree: '', year: '' }]
   );
 
-  // --- EDUCATION LOGIC ---
-  const handleEduChange = (id, field, value) => {
-    setEduDetails(eduDetails.map(edu => edu.id === id ? { ...edu, [field]: value } : edu));
+  // 🌟 THE LIMIT ENGINE
+  const getMaxMedia = () => {
+    if (subscriptionTier === 'executive') return 10;
+    if (subscriptionTier === 'pro') return 5;
+    if (subscriptionTier === 'basic') return 3;
+    return 0; // Free
   };
-  const addEdu = () => setEduDetails([...eduDetails, { id: Date.now(), school: '', degree: '' }]);
-  const removeEdu = (id) => setEduDetails(eduDetails.filter(edu => edu.id !== id));
+  
+  const canUploadVideo = subscriptionTier === 'executive';
+  const maxMedia = getMaxMedia();
 
-  // --- WORK LOGIC ---
-  const handleWorkChange = (id, field, value) => {
-    setWorkHistory(workHistory.map(job => job.id === id ? { ...job, [field]: value } : job));
+  // --- WORK HISTORY HANDLERS ---
+  const handleWorkChange = (index, field, value) => {
+    const updatedHistory = [...workHistory];
+    updatedHistory[index][field] = value;
+    setWorkHistory(updatedHistory);
   };
-  const addWorkRole = () => setWorkHistory([...workHistory, { id: Date.now(), company: '', jobTitle: '', startDate: '', endDate: '', responsibilities: '', achievements: '' }]);
-  const removeWorkRole = (id) => setWorkHistory(workHistory.filter(job => job.id !== id));
+
+  const addJob = () => {
+    setWorkHistory([...workHistory, { company: '', title: '', dates: '', description: '', media: [] }]);
+  };
+
+  const removeJob = (index) => {
+    setWorkHistory(workHistory.filter((_, i) => i !== index));
+  };
+
+  // 🌟 MEDIA HANDLERS
+  const handleAddMedia = (index, type) => {
+    const job = workHistory[index];
+    const currentMediaCount = job.media?.length || 0;
+
+    if (currentMediaCount >= maxMedia) {
+      alert(`🌟 Your current tier limits you to ${maxMedia} media items per job. Upgrade to add more!`);
+      return;
+    }
+
+    if (type === 'video' && !canUploadVideo) {
+      alert("🌟 Video uploads are an Executive Tier exclusive. Upgrade to stand out with video!");
+      return;
+    }
+
+    // For now, we'll just simulate adding a file name. 
+    // Later, you can attach your Firebase Storage upload logic here!
+    const updatedHistory = [...workHistory];
+    const newMedia = job.media || [];
+    updatedHistory[index].media = [...newMedia, { type, name: `Sample ${type} Upload` }];
+    setWorkHistory(updatedHistory);
+  };
+
+  const removeMedia = (jobIndex, mediaIndex) => {
+    const updatedHistory = [...workHistory];
+    updatedHistory[jobIndex].media.splice(mediaIndex, 1);
+    setWorkHistory(updatedHistory);
+  };
+
+  // --- EDUCATION HANDLERS ---
+  const handleEduChange = (index, field, value) => {
+    const updatedEdu = [...eduDetails];
+    updatedEdu[index][field] = value;
+    setEduDetails(updatedEdu);
+  };
+
+  const addEducation = () => setEduDetails([...eduDetails, { school: '', degree: '', year: '' }]);
+  const removeEducation = (index) => setEduDetails(eduDetails.filter((_, i) => i !== index));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onComplete({ showEdu, eduDetails, workHistory });
+    onComplete({ showEdu: eduDetails.length > 0 && eduDetails[0].school !== '', workHistory, eduDetails });
   };
 
-  // 🎨 THE MASTER BLUE-GRAY DESIGN SYSTEM
-  const styles = {
-    container: { maxWidth: '800px', margin: '0 auto', fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: '#0f172a' },
-    card: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '40px', boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.05)' },
-    header: { textAlign: 'center', marginBottom: '32px' },
-    title: { fontSize: '28px', fontWeight: '700', color: '#1e293b', margin: '0 0 8px 0' },
-    subtitle: { fontSize: '16px', color: '#64748b', margin: '0' },
-    
-    sectionHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', marginTop: '32px', borderBottom: '2px solid #f1f5f9', paddingBottom: '12px' },
-    sectionTitle: { fontSize: '20px', fontWeight: '700', color: '#1e293b', margin: 0 },
-    
-    innerCard: { backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '20px' },
-    
-    // Header for the inner cards to hold the Remove button
-    innerCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' },
-    innerCardTitle: { margin: 0, color: '#94a3b8', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700' },
-    removeBtn: { color: '#ef4444', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'opacity 0.2s' },
-
-    inputGroup: { marginBottom: '20px' },
-    label: { display: 'block', fontSize: '14px', fontWeight: '600', color: '#475569', marginBottom: '8px' },
-    
-    input: { width: '100%', padding: '14px 16px', backgroundColor: '#ffffff', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '16px', color: '#0f172a', outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s ease', fontFamily: 'inherit' },
-    textarea: { width: '100%', padding: '14px 16px', backgroundColor: '#ffffff', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '16px', color: '#0f172a', outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s ease', fontFamily: 'inherit', minHeight: '100px', resize: 'vertical' },
-    
-    toggleContainer: { display: 'flex', gap: '12px', marginBottom: '20px' },
-    toggleBtn: (active) => ({ flex: 1, padding: '12px', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', backgroundColor: active ? '#eff6ff' : '#ffffff', color: active ? '#3b82f6' : '#64748b', border: active ? '2px solid #93c5fd' : '2px solid #e2e8f0' }),
-
-    addBtn: { width: '100%', padding: '16px', backgroundColor: 'transparent', border: '2px dashed #cbd5e1', color: '#64748b', fontWeight: '600', borderRadius: '12px', cursor: 'pointer', fontSize: '16px', transition: 'all 0.2s ease', marginBottom: '16px' },
-    
-    buttonContainer: { display: 'flex', gap: '16px', marginTop: '32px' },
-    secondaryButton: { flex: 1, padding: '16px 24px', backgroundColor: '#f8fafc', border: '2px solid #e2e8f0', color: '#475569', fontWeight: '600', borderRadius: '12px', cursor: 'pointer', fontSize: '16px', transition: 'all 0.2s ease' },
-    primaryButton: { flex: 1, padding: '16px 24px', backgroundColor: '#3b82f6', border: 'none', color: '#ffffff', fontWeight: '600', borderRadius: '12px', cursor: 'pointer', fontSize: '16px', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)', transition: 'all 0.2s ease' }
-  };
+  const inputStyle = { width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', color: '#0f172a', fontSize: '15px', outline: 'none', boxSizing: 'border-box' };
+  const labelStyle = { display: 'block', fontSize: '13px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>Let's build your background.</h2>
-          <p style={styles.subtitle}>Fill in the details below so our AI can format them perfectly.</p>
-        </div>
+    <div style={{ maxWidth: '800px', margin: '0 auto', fontFamily: 'system-ui' }}>
+      
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#1e293b', margin: '0 0 10px 0' }}>Experience & Education</h2>
+        <p style={{ fontSize: '16px', color: '#64748b' }}>Let's detail your background. Don't worry about perfect formatting—our AI will polish it for you.</p>
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          
-          {/* EDUCATION SECTION */}
-          <div>
-            <div style={styles.sectionHeader}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-              </svg>
-              <h3 style={styles.sectionTitle}>Education & Certifications</h3>
-            </div>
-            
-            <div style={styles.toggleContainer}>
-              <button type="button" onClick={() => setShowEdu(true)} style={styles.toggleBtn(showEdu)}>Yes</button>
-              <button type="button" onClick={() => setShowEdu(false)} style={styles.toggleBtn(!showEdu)}>No</button>
-            </div>
+      <form onSubmit={handleSubmit}>
+        
+        {/* --- WORK HISTORY SECTION --- */}
+        <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', borderBottom: '2px solid #f1f5f9', paddingBottom: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Briefcase size={24} color="#3b82f6" /> Professional Experience
+          </h3>
 
-            {showEdu && (
-              <>
-                {eduDetails.map((edu, index) => (
-                  <div key={edu.id} style={styles.innerCard}>
-                    <div style={styles.innerCardHeader}>
-                      <h4 style={styles.innerCardTitle}>Institution #{index + 1}</h4>
-                      {eduDetails.length > 1 && (
-                        <button type="button" onClick={() => removeEdu(edu.id)} style={styles.removeBtn}>Remove</button>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <div style={{ ...styles.inputGroup, flex: 1, marginBottom: 0 }}>
-                        <label style={styles.label}>Institution Name</label>
-                        <input type="text" required value={edu.school} onChange={(e) => handleEduChange(edu.id, 'school', e.target.value)} style={styles.input} placeholder="e.g., Northern Illinois University" />
-                      </div>
-                      <div style={{ ...styles.inputGroup, flex: 1, marginBottom: 0 }}>
-                        <label style={styles.label}>Degree / Certification</label>
-                        <input type="text" required value={edu.degree} onChange={(e) => handleEduChange(edu.id, 'degree', e.target.value)} style={styles.input} placeholder="e.g., BFA Visual Communication" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <button type="button" onClick={addEdu} style={styles.addBtn}>+ Add Another Degree/Cert</button>
-              </>
-            )}
-          </div>
+          {workHistory.map((job, index) => (
+            <div key={index} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px', marginBottom: '20px', position: 'relative' }}>
+              
+              {workHistory.length > 1 && (
+                <button type="button" onClick={() => removeJob(index)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                  <Trash2 size={18} />
+                </button>
+              )}
 
-          {/* WORK EXPERIENCE ARRAY */}
-          <div>
-            <div style={styles.sectionHeader}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-              </svg>
-              <h3 style={styles.sectionTitle}>Work Experience</h3>
-            </div>
-            
-            {workHistory.map((job, index) => (
-              <div key={job.id} style={styles.innerCard}>
-                <div style={styles.innerCardHeader}>
-                  <h4 style={styles.innerCardTitle}>Role #{index + 1}</h4>
-                  {/* ✨ ONLY show the remove button if there is more than 1 job! */}
-                  {workHistory.length > 1 && (
-                    <button type="button" onClick={() => removeWorkRole(job.id)} style={styles.removeBtn}>Remove</button>
-                  )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={labelStyle}>Job Title</label>
+                  <input type="text" required style={inputStyle} placeholder="e.g. Senior Manager" value={job.title} onChange={(e) => handleWorkChange(index, 'title', e.target.value)} />
                 </div>
-                
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div style={{ ...styles.inputGroup, flex: 1 }}>
-                    <label style={styles.label}>Company Name</label>
-                    <input type="text" required value={job.company} onChange={(e) => handleWorkChange(job.id, 'company', e.target.value)} style={styles.input} />
-                  </div>
-                  <div style={{ ...styles.inputGroup, flex: 1 }}>
-                    <label style={styles.label}>Job Title</label>
-                    <input type="text" required value={job.jobTitle} onChange={(e) => handleWorkChange(job.id, 'jobTitle', e.target.value)} style={styles.input} />
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  <div style={{ ...styles.inputGroup, flex: 1 }}>
-                    <label style={styles.label}>Start Date</label>
-                    <input type="text" placeholder="Jan 2022" value={job.startDate} onChange={(e) => handleWorkChange(job.id, 'startDate', e.target.value)} style={styles.input} />
-                  </div>
-                  <div style={{ ...styles.inputGroup, flex: 1 }}>
-                    <label style={styles.label}>End Date</label>
-                    <input type="text" placeholder="Present" value={job.endDate} onChange={(e) => handleWorkChange(job.id, 'endDate', e.target.value)} style={styles.input} />
-                  </div>
-                </div>
-                
-                <div style={styles.inputGroup}>
-                  <label style={styles.label}>Daily Responsibilities</label>
-                  <textarea required placeholder="What did you do day-to-day?" value={job.responsibilities} onChange={(e) => handleWorkChange(job.id, 'responsibilities', e.target.value)} style={styles.textarea} />
-                </div>
-                <div style={{ ...styles.inputGroup, marginBottom: '0' }}>
-                  <label style={styles.label}>Top Achievements / Metrics</label>
-                  <textarea required placeholder="Awards, quota crushed, team size, etc." value={job.achievements} onChange={(e) => handleWorkChange(job.id, 'achievements', e.target.value)} style={styles.textarea} />
+                <div>
+                  <label style={labelStyle}>Company Name</label>
+                  <input type="text" required style={inputStyle} placeholder="e.g. Google" value={job.company} onChange={(e) => handleWorkChange(index, 'company', e.target.value)} />
                 </div>
               </div>
-            ))}
+              
+              <div style={{ marginBottom: '20px' }}>
+                <label style={labelStyle}>Dates of Employment</label>
+                <input type="text" required style={inputStyle} placeholder="e.g. March 2021 - Present" value={job.dates} onChange={(e) => handleWorkChange(index, 'dates', e.target.value)} />
+              </div>
 
-            <button type="button" onClick={addWorkRole} style={styles.addBtn}>
-              + Add Another Role
-            </button>
-          </div>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={labelStyle}>Key Responsibilities & Achievements</label>
+                <textarea required style={{ ...inputStyle, minHeight: '120px', resize: 'vertical' }} placeholder="Briefly describe what you did here. Bullet points are fine!" value={job.description} onChange={(e) => handleWorkChange(index, 'description', e.target.value)} />
+              </div>
 
-          {/* BOTTOM NAVIGATION BUTTONS */}
-          <div style={styles.buttonContainer}>
-            <button 
-              type="button" 
-              onClick={() => onBack({ workHistory, showEdu, eduDetails })} 
-              style={styles.secondaryButton}
-            >
-              Back
-            </button>
-            <button type="submit" style={styles.primaryButton}>
-              Continue to Target Role
-            </button>
-          </div>
+              {/* 🌟 NEW: THE MEDIA UPLOAD PAYWALL SECTION */}
+              <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#475569', textTransform: 'uppercase' }}>Accomplishment Media ({job.media?.length || 0}/{maxMedia})</span>
+                </div>
+                
+                {/* Simulated Media Previews */}
+                {job.media && job.media.length > 0 && (
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    {job.media.map((m, mIdx) => (
+                      <div key={mIdx} style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {m.type === 'image' ? <ImageIcon size={14} /> : <Video size={14} />} {m.name}
+                        <button type="button" onClick={() => removeMedia(index, mIdx)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0', marginLeft: '4px' }}><Trash2 size={12} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-        </form>
-      </div>
+                {/* Upload Buttons */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button type="button" onClick={() => handleAddMedia(index, 'image')} style={{ padding: '8px 16px', backgroundColor: maxMedia === 0 ? '#f1f5f9' : '#eff6ff', color: maxMedia === 0 ? '#94a3b8' : '#3b82f6', border: maxMedia === 0 ? '1px solid #e2e8f0' : '1px solid #bfdbfe', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ImageIcon size={16} /> Add Image {maxMedia === 0 && <Lock size={12} />}
+                  </button>
+                  
+                  <button type="button" onClick={() => handleAddMedia(index, 'video')} style={{ padding: '8px 16px', backgroundColor: canUploadVideo ? '#f5f3ff' : '#f1f5f9', color: canUploadVideo ? '#8b5cf6' : '#94a3b8', border: canUploadVideo ? '1px solid #ddd6fe' : '1px solid #e2e8f0', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Video size={16} /> Add Video {!canUploadVideo && <Lock size={12} />}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          ))}
+
+          <button type="button" onClick={addJob} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', background: 'none', border: 'none', fontWeight: '700', fontSize: '15px', cursor: 'pointer', padding: '0' }}>
+            <Plus size={18} /> Add Another Role
+          </button>
+        </div>
+
+        {/* ... (Education Section and Nav Buttons remain exactly the same) ... */}
+        <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', borderBottom: '2px solid #f1f5f9', paddingBottom: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <GraduationCap size={24} color="#8b5cf6" /> Education & Certifications
+          </h3>
+
+          {eduDetails.map((edu, index) => (
+            <div key={index} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px', marginBottom: '20px', position: 'relative' }}>
+              {eduDetails.length > 1 && (
+                <button type="button" onClick={() => removeEducation(index)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                  <Trash2 size={18} />
+                </button>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={labelStyle}>Degree / Certification</label>
+                  <input type="text" style={inputStyle} placeholder="e.g. B.S. Computer Science" value={edu.degree} onChange={(e) => handleEduChange(index, 'degree', e.target.value)} />
+                </div>
+                <div>
+                  <label style={labelStyle}>School / Institution</label>
+                  <input type="text" style={inputStyle} placeholder="e.g. Stanford University" value={edu.school} onChange={(e) => handleEduChange(index, 'school', e.target.value)} />
+                </div>
+              </div>
+            </div>
+          ))}
+          <button type="button" onClick={addEducation} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8b5cf6', background: 'none', border: 'none', fontWeight: '700', fontSize: '15px', cursor: 'pointer', padding: '0' }}>
+            <Plus size={18} /> Add Another Degree
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button type="button" onClick={onBack} style={{ padding: '14px 28px', backgroundColor: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ArrowLeft size={18} /> Back
+          </button>
+          <button type="submit" style={{ padding: '14px 28px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.4)' }}>
+            Next Step <ArrowRight size={18} />
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

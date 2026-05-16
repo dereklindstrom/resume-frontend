@@ -148,7 +148,15 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
       <ProgressBar currentStep={step} setStep={setStep} />
       {step === 1 && <BaselineForm onComplete={handleBaselineComplete} />}
       {step === 2 && <ExperienceFork onSelect={handleExperienceSelect} onBack={() => setStep(step - 1)} />}
-      {step === 3 && <ExperienceDetails level={userData.experienceLevel} savedData={userData.experienceDetails} onComplete={handleDetailsComplete} onBack={() => setStep(2)} />}
+      {step === 3 && (
+  <ExperienceDetails 
+    level={userData.experienceLevel} 
+    savedData={userData.experienceDetails} 
+    onComplete={handleDetailsComplete} 
+    onBack={() => setStep(2)} 
+    subscriptionTier={subscriptionTier} /* 🌟 The new wire! */
+  />
+)}
       {step === 4 && <ObjectiveForm workHistory={userData.experienceDetails?.workHistory} savedData={userData.objective} onComplete={handleObjectiveComplete} onBack={() => setStep(3)} />}
       {step === 5 && <BehavioralQuestions onComplete={handleStoriesComplete} onBack={() => setStep(step - 1)} />}
       {step === 6 && <VideoStep onComplete={handleVideoComplete} onBack={() => setStep(step - 1)} />}
