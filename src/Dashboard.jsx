@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from './firebase';
 import { collection, query, where, getDocs, deleteDoc, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star, Check, X } from 'lucide-react';
 
 // 🌟 STEP 1: Define your Stripe Price IDs here
@@ -63,12 +64,7 @@ export default function Dashboard() {
     return () => unsubscribeUser();
   }, [navigate]);
 
-  // 🚀 THE NEW UPGRADE ENGINE: Now accepts a specific tier
-  const handleUpgradeClick = async (selectedTier) => {
-    try {
-      const priceId = STRIPE_PRICES[selectedTier];
-      
-    // 🛠️ DEV MODE TOGGLE (Upgraded to handle missing documents)
+  // 🛠️ DEV MODE TOGGLE (Now safely outside the upgrade click function!)
   const forceTierChange = async (newTier) => {
     try {
       if (!auth.currentUser) return;
@@ -89,6 +85,11 @@ export default function Dashboard() {
     }
   };
 
+  // 🚀 THE NEW UPGRADE ENGINE: Now accepts a specific tier
+  const handleUpgradeClick = async (selectedTier) => {
+    try {
+      const priceId = STRIPE_PRICES[selectedTier];
+      
       const response = await fetch("https://createstripecheckout-u4ujgfkbxa-uc.a.run.app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,16 +205,8 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <button onClick={handleSignOut} style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <LogOut size={16} /> Sign Out
-          </button>
-        </div>
-      </nav>
-
-<div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          
-          {/* 🛠️ SECRET DEV TOGGLE (Remove before launching to public!) */}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          {/* 🛠️ SECRET DEV TOGGLE (Tucked safely into the nav bar!) */}
           <select 
             value={subscriptionTier} 
             onChange={(e) => forceTierChange(e.target.value)}
@@ -229,8 +222,9 @@ export default function Dashboard() {
             <LogOut size={16} /> Sign Out
           </button>
         </div>
+      </nav>
 
-      {/* REST OF DASHBOARD CONTENT (STAYS THE SAME) */}
+      {/* REST OF DASHBOARD CONTENT */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 5%' }}>
         {isSuccess && (
           <div style={{ backgroundColor: '#ecfdf5', borderLeft: '4px solid #10b981', padding: '16px', marginBottom: '32px', borderRadius: '0 8px 8px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -262,49 +256,49 @@ export default function Dashboard() {
               </div>
             ) : (
               resumes.map((resume) => (
-  <div 
-    key={resume.id} 
-    onClick={() => navigate('/builder', { state: { editData: resume } })}
-    style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', cursor: 'pointer', transition: 'all 0.2s', position: 'relative', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}
-    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0,0,0,0.05)'; }}
-    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'; }}
-  >
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-      {resume.media?.hasMedia && resume.media?.publicUrl ? (
-        <img 
-          src={resume.media.publicUrl} 
-          alt="Profile" 
-          style={{ width: '50px', height: '50px', borderRadius: resume.media.shape === 'circle' ? '50%' : '8px', objectFit: 'cover', border: '2px solid #e2e8f0' }} 
-        />
-      ) : (
-        <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #cbd5e1' }}>
-          <Briefcase size={20} color="#94a3b8" />
-        </div>
-      )}
-      
-      <button onClick={(e) => handleDelete(e, resume.id)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '4px' }} title="Delete">
-        <Trash2 size={16} />
-      </button>
-    </div>
+                <div 
+                  key={resume.id} 
+                  onClick={() => navigate('/builder', { state: { editData: resume } })}
+                  style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', cursor: 'pointer', transition: 'all 0.2s', position: 'relative', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0,0,0,0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'; }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                    {resume.media?.hasMedia && resume.media?.publicUrl ? (
+                      <img 
+                        src={resume.media.publicUrl} 
+                        alt="Profile" 
+                        style={{ width: '50px', height: '50px', borderRadius: resume.media.shape === 'circle' ? '50%' : '8px', objectFit: 'cover', border: '2px solid #e2e8f0' }} 
+                      />
+                    ) : (
+                      <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #cbd5e1' }}>
+                        <Briefcase size={20} color="#94a3b8" />
+                      </div>
+                    )}
+                    
+                    <button onClick={(e) => handleDelete(e, resume.id)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '4px' }} title="Delete">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
 
-    <div style={{ backgroundColor: '#eff6ff', color: '#3b82f6', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
-        <Target size={12} /> {resume.userData?.objective?.targetIndustry || "General"}
-    </div>
-    
-    <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', lineHeight: '1.3' }}>
-      {resume.userData?.objective?.targetRole || "Executive Professional"}
-    </h3>
-    
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>
-      {resume.userData?.baseline?.name || "Anonymous Profile"}
-    </div>
-    
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #f1f5f9', color: '#94a3b8', fontSize: '12px', fontWeight: '500' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12} /> {new Date(resume.createdAt).toLocaleDateString()}</span>
-      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={12} /> {resume.design?.layout || "signature"}</span>
-    </div>
-  </div>
-))
+                  <div style={{ backgroundColor: '#eff6ff', color: '#3b82f6', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+                      <Target size={12} /> {resume.userData?.objective?.targetIndustry || "General"}
+                  </div>
+                  
+                  <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', lineHeight: '1.3' }}>
+                    {resume.userData?.objective?.targetRole || "Executive Professional"}
+                  </h3>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>
+                    {resume.userData?.baseline?.name || "Anonymous Profile"}
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #f1f5f9', color: '#94a3b8', fontSize: '12px', fontWeight: '500' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12} /> {new Date(resume.createdAt).toLocaleDateString()}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={12} /> {resume.design?.layout || "signature"}</span>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         )}
