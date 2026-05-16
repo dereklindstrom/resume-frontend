@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from './firebase';
-import { collection, query, where, getDocs, deleteDoc, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore'; // 🌟 Added updateDocimport { signOut } from 'firebase/auth';
+import { collection, query, where, getDocs, deleteDoc, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star, Check, X } from 'lucide-react';
 
 // 🌟 STEP 1: Define your Stripe Price IDs here
@@ -68,14 +68,24 @@ export default function Dashboard() {
     try {
       const priceId = STRIPE_PRICES[selectedTier];
       
-      // 🛠️ DEV MODE TOGGLE
+    // 🛠️ DEV MODE TOGGLE (Upgraded to handle missing documents)
   const forceTierChange = async (newTier) => {
     try {
+      if (!auth.currentUser) return;
+      
       const userRef = doc(db, "users", auth.currentUser.uid);
-      await updateDoc(userRef, { subscriptionTier: newTier });
-      // The onSnapshot listener will automatically catch this and update the UI!
+      
+      // We use setDoc with merge:true instead of updateDoc. 
+      // This forces the document to create itself if it's missing!
+      await setDoc(userRef, { 
+        subscriptionTier: newTier,
+        isPremium: newTier !== 'free' // Also flips the master switch just in case
+      }, { merge: true });
+      
+      console.log(`God Mode Activated: Tier set to ${newTier}`);
     } catch (error) {
       console.error("Failed to update tier:", error);
+      alert("Error updating tier. Check your browser console (F12) for Firebase rules errors.");
     }
   };
 
