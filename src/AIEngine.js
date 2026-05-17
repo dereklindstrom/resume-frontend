@@ -1,26 +1,44 @@
-export const generateResumeAPI = async (userData, isPremium = false) => {
-    console.log("🚀 Sending data to the secure backend...");
+// 🌟 Now accepting the specific tier instead of just true/false
+export const generateResumeAPI = async (userData, subscriptionTier = 'free') => {
+  console.log(`🚀 Sending data to the secure backend... (Tier: ${subscriptionTier})`);
   
-    let systemPrompt = `You are an expert executive resume writer. 
-  Create a professional profile based on these details: ${JSON.stringify(userData)}.`;
- 
-  // 🌟 THE PREMIUM INJECTION
-  if (isPremium === true) {
-      prompt += `
+  // 1. Establish who gets the Power Metrics
+  const isPremiumAI = subscriptionTier === 'pro' || subscriptionTier === 'executive';
+
+  // 2. Build the base prompt
+  let systemPrompt = `You are an expert executive resume writer. 
+  Create a professional profile based on these details: ${JSON.stringify(userData)}.
+  Return the output STRICTLY in JSON format.`;
+
+  // 🌟 3. THE 3-TIER PREMIUM INJECTION
+  if (isPremiumAI) {
+    systemPrompt += `
     CRITICAL PREMIUM REQUIREMENT: 
     - You MUST quantify at least 80% of the bullet points. 
     - Use specific metrics: percentages, dollar amounts, headcount, or time-saved.
     - If no metric is provided in the data, use your expertise to infer realistic "Power Metrics" 
       based on the user's seniority (e.g., 'Optimized regional operations resulting in an estimated 15% efficiency gain').
-    - Focus on 'Action -> Result' formatting.`;
+    - Focus aggressively on 'Action -> Result' formatting.`;
+  } else {
+    systemPrompt += `
+    STANDARD REQUIREMENT:
+    - Format the work experience clearly and professionally.
+    - Do NOT invent metrics, percentages, or numbers that are not explicitly provided in the raw data.
+    - Ensure a professional and polite tone.`;
   }
+
   try {
     const API_URL = 'https://resume-api-rr5i.onrender.com/api/generate-resume';
     
+    // 🚨 4. CRITICAL FIX: We are now sending BOTH the userData AND the systemPrompt to your backend!
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData) 
+      body: JSON.stringify({ 
+        userData: userData,
+        customPrompt: systemPrompt, // Passing the instructions!
+        tier: subscriptionTier
+      }) 
     });
 
     const data = await response.json();
@@ -33,8 +51,7 @@ export const generateResumeAPI = async (userData, isPremium = false) => {
         // Parse it into a real JavaScript Object
         const aiData = JSON.parse(cleanJsonString);
         
-        // 🔥 THE FIX: Stop translating it to text! 
-        // Hand the pure JSON object directly to FinalResumeView.jsx!
+        // 🔥 Hand the pure JSON object directly to FinalResumeView.jsx
         return aiData;
 
       } catch (parseError) {
