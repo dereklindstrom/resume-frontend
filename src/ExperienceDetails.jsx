@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Briefcase, GraduationCap, Plus, Trash2, ArrowRight, ArrowLeft, Image as ImageIcon, Video, Lock } from 'lucide-react';
+import { Briefcase, GraduationCap, Plus, Trash2, ArrowRight, ArrowLeft, Image as ImageIcon, Video, Lock, Loader2 } from 'lucide-react';
+import { storage, auth } from './firebase'; // Make sure this path is correct!
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 // 🌟 1. Added subscriptionTier to props
 export default function ExperienceDetails({ level, savedData, onComplete, onBack, subscriptionTier = 'free' }) {
@@ -10,6 +12,8 @@ export default function ExperienceDetails({ level, savedData, onComplete, onBack
   const [eduDetails, setEduDetails] = useState(
     savedData?.eduDetails || [{ school: '', degree: '', year: '' }]
   );
+
+  const [isUploading, setIsUploading] = useState(false);
 
   // 🌟 THE LIMIT ENGINE
   const getMaxMedia = () => {
@@ -38,6 +42,7 @@ export default function ExperienceDetails({ level, savedData, onComplete, onBack
   };
 
   // 🌟 MEDIA HANDLERS
+  // 🌟 REAL FIREBASE MEDIA UPLOAD
   const handleAddMedia = (index, type) => {
     const job = workHistory[index];
     const currentMediaCount = job.media?.length || 0;
@@ -52,12 +57,61 @@ export default function ExperienceDetails({ level, savedData, onComplete, onBack
       return;
     }
 
-    // For now, we'll just simulate adding a file name. 
-    // Later, you can attach your Firebase Storage upload logic here!
-    const updatedHistory = [...workHistory];
-    const newMedia = job.media || [];
-    updatedHistory[index].media = [...newMedia, { type, name: `Sample ${type} Upload` }];
-    setWorkHistory(updatedHistory);
+    // 1. Create an invisible file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = type === 'image' ? 'image/jpeg, image/png, image/webp' : 'video/mp4, video/webm';
+
+    // 2. Listen for the user to select a file
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Basic size limit check (e.g., 5MB for images, 50MB for video)
+      const maxSize = type === 'image' ? 5 * 1024 * 1024 : 50 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert(`File is too large! Maximum size is ${type === 'image' ? '5MB' : '50MB'}.`);
+        return;
+      }
+
+      setIsUploading(true);
+
+      try {
+        // 3. Create a secure path in Firebase Storage: users/{uid}/portfolio/{timestamp_filename}
+        const storageRef = ref(storage, `users/${auth.currentUser.uid}/portfolio/${Date.now()}_${file.name}`);
+        
+        // 4. Start the upload
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            // You could track upload progress here if you wanted a progress bar
+          }, 
+          (error) => {
+            console.error("Upload failed:", error);
+            alert("Failed to upload file. Check your Firebase Storage rules.");
+            setIsUploading(false);
+          }, 
+          async () => {
+            // 5. Success! Get the public URL and save it to the resume state
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            
+            const updatedHistory = [...workHistory];
+            const newMedia = job.media || [];
+            updatedHistory[index].media = [...newMedia, { type, name: file.name, url: downloadURL }];
+            setWorkHistory(updatedHistory);
+            
+            setIsUploading(false);
+          }
+        );
+      } catch (error) {
+        console.error("Storage Error:", error);
+        setIsUploading(false);
+      }
+    };
+
+    // Trigger the file browser to open
+    fileInput.click();
   };
 
   const removeMedia = (jobIndex, mediaIndex) => {
@@ -149,14 +203,16 @@ export default function ExperienceDetails({ level, savedData, onComplete, onBack
                 )}
 
                 {/* Upload Buttons */}
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button type="button" onClick={() => handleAddMedia(index, 'image')} style={{ padding: '8px 16px', backgroundColor: maxMedia === 0 ? '#f1f5f9' : '#eff6ff', color: maxMedia === 0 ? '#94a3b8' : '#3b82f6', border: maxMedia === 0 ? '1px solid #e2e8f0' : '1px solid #bfdbfe', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <button type="button" onClick={() => handleAddMedia(index, 'image')} disabled={isUploading} style={{ padding: '8px 16px', backgroundColor: maxMedia === 0 ? '#f1f5f9' : '#eff6ff', color: maxMedia === 0 ? '#94a3b8' : '#3b82f6', border: maxMedia === 0 ? '1px solid #e2e8f0' : '1px solid #bfdbfe', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: isUploading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', opacity: isUploading ? 0.5 : 1 }}>
                     <ImageIcon size={16} /> Add Image {maxMedia === 0 && <Lock size={12} />}
                   </button>
                   
-                  <button type="button" onClick={() => handleAddMedia(index, 'video')} style={{ padding: '8px 16px', backgroundColor: canUploadVideo ? '#f5f3ff' : '#f1f5f9', color: canUploadVideo ? '#8b5cf6' : '#94a3b8', border: canUploadVideo ? '1px solid #ddd6fe' : '1px solid #e2e8f0', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button type="button" onClick={() => handleAddMedia(index, 'video')} disabled={isUploading} style={{ padding: '8px 16px', backgroundColor: canUploadVideo ? '#f5f3ff' : '#f1f5f9', color: canUploadVideo ? '#8b5cf6' : '#94a3b8', border: canUploadVideo ? '1px solid #ddd6fe' : '1px solid #e2e8f0', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: isUploading ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', opacity: isUploading ? 0.5 : 1 }}>
                     <Video size={16} /> Add Video {!canUploadVideo && <Lock size={12} />}
                   </button>
+
+                  {isUploading && <Loader2 size={16} color="#64748b" style={{ animation: 'spin 1s linear infinite' }} />}
                 </div>
               </div>
 
