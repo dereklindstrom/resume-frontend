@@ -64,26 +64,6 @@ export default function Dashboard() {
     return () => unsubscribeUser();
   }, [navigate]);
 
-  // 🛠️ DEV MODE TOGGLE (Now safely outside the upgrade click function!)
-  const forceTierChange = async (newTier) => {
-    try {
-      if (!auth.currentUser) return;
-      
-      const userRef = doc(db, "users", auth.currentUser.uid);
-      
-      // We use setDoc with merge:true instead of updateDoc. 
-      // This forces the document to create itself if it's missing!
-      await setDoc(userRef, { 
-        subscriptionTier: newTier,
-        isPremium: newTier !== 'free' // Also flips the master switch just in case
-      }, { merge: true });
-      
-      console.log(`God Mode Activated: Tier set to ${newTier}`);
-    } catch (error) {
-      console.error("Failed to update tier:", error);
-      alert("Error updating tier. Check your browser console (F12) for Firebase rules errors.");
-    }
-  };
 
   // 🚀 THE NEW UPGRADE ENGINE: Now accepts a specific tier
   const handleUpgradeClick = async (selectedTier) => {
@@ -206,17 +186,7 @@ export default function Dashboard() {
         </div>
 
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          {/* 🛠️ SECRET DEV TOGGLE (Tucked safely into the nav bar!) */}
-          <select 
-            value={subscriptionTier} 
-            onChange={(e) => forceTierChange(e.target.value)}
-            style={{ padding: '6px', borderRadius: '4px', backgroundColor: '#fef08a', border: '1px solid #eab308', color: '#854d0e', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
-          >
-            <option value="free">Dev: Free</option>
-            <option value="basic">Dev: Basic</option>
-            <option value="pro">Dev: Pro</option>
-            <option value="executive">Dev: Exec</option>
-          </select>
+          
 
           <button onClick={handleSignOut} style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <LogOut size={16} /> Sign Out
