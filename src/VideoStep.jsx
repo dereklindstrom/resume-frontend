@@ -102,7 +102,7 @@ export default function VideoStep({ onComplete, onBack }) {
       
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
         <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#1e293b', margin: '0 0 10px 0' }}>Profile Headshot</h2>
-        <p style={{ fontSize: '16px', color: '#64748b' }}>Make your resume stand out. Upload a professional headshot or snap a quick photo.</p>
+        <p style={{ fontSize: '16px', color: '#64748b' }}>Make your resume stand out. Upload a professional headshot, snap a quick photo, or record a 20 second video introduction.</p>
       </div>
 
       <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)', marginBottom: '30px' }}>

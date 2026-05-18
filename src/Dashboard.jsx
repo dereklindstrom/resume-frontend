@@ -7,9 +7,9 @@ import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, Brai
 
 // 🌟 STEP 1: Define your Stripe Price IDs here
 const STRIPE_PRICES = {
-  basic: "price_1TXJpSCNR4URVUQBq1nJPWDb",     // $3
-  pro: "price_1TXJpxCNR4URVUQBEVT5dqHL",         // $7
-  executive: "price_1TV0t4CNR4URVUQBoBvHFYDK"   // $9
+  basic: "price_1TYJ2KFq1iLZWOKqbrEZq8jN",     // $3
+  pro: "price_1TYJ2FFq1iLZWOKqrtRIR4ng",         // $7
+  executive: "price_1TYJ2JFq1iLZWOKqlblyuhty"   // $9
 };
 
 export default function Dashboard() {
