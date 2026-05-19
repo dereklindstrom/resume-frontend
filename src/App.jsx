@@ -5,9 +5,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore'; 
 
 // --- PAGES & COMPONENTS ---
-import Navbar from './components/Navbar';
-import LandingPage from './components/LandingPage';
-import Dashboard from './components/Dashboard';
+import Navbar from './Navbar';
+import LandingPage from './LandingPage';
+import Dashboard from './Dashboard';
 import AuthScreen from './AuthScreen';
 import PublicProfile from './PublicProfile';
 import ProtectedRoute from './ProtectedRoute';
