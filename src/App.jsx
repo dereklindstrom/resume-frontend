@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { auth } from './firebase';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore'; 
-import { db } from './firebase';
 
 // --- PAGES & COMPONENTS ---
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
@@ -23,21 +21,6 @@ import BehavioralQuestions from './BehavioralQuestions';
 import VideoStep from './VideoStep'; 
 import FinalResumeView from './FinalResumeView';
 import { generateResumeAPI } from './AIEngine';
-
-export default function App() {
-  return (
-    <Router>
-      {/* 🌟 The Navbar sits OUTSIDE the Routes so it never unmounts! */}
-      <Navbar />
-      
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* ... your other routes ... */}
-      </Routes>
-    </Router>
-  );
-}
 
 // 🔥 Progress Bar Component
 const ProgressBar = ({ currentStep, setStep }) => { 
@@ -134,7 +117,6 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
     }, 2500);
 
    try {
-    // 🌟 Pass isPremium to the AI engine here
     let aiResponse = await generateResumeAPI(finalProfile, isPremium); 
     setFinalResume(aiResponse);
   } catch (error) {
@@ -149,8 +131,6 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
   const handleRegenerate = async () => {
     setIsGenerating(true);
     try {
-      // 🌟 Pass 'isPremium' here! 
-      // This tells the AI to use the Power Metrics prompt on the existing data.
       const aiResponse = await generateResumeAPI(userData, isPremium); 
     setFinalResume(aiResponse);
     } catch (error) {
@@ -166,14 +146,14 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
       {step === 1 && <BaselineForm onComplete={handleBaselineComplete} />}
       {step === 2 && <ExperienceFork onSelect={handleExperienceSelect} onBack={() => setStep(step - 1)} />}
       {step === 3 && (
-  <ExperienceDetails 
-    level={userData.experienceLevel} 
-    savedData={userData.experienceDetails} 
-    onComplete={handleDetailsComplete} 
-    onBack={() => setStep(2)} 
-    subscriptionTier={subscriptionTier} /* 🌟 The new wire! */
-  />
-)}
+        <ExperienceDetails 
+          level={userData.experienceLevel} 
+          savedData={userData.experienceDetails} 
+          onComplete={handleDetailsComplete} 
+          onBack={() => setStep(2)} 
+          subscriptionTier={subscriptionTier}
+        />
+      )}
       {step === 4 && <ObjectiveForm workHistory={userData.experienceDetails?.workHistory} savedData={userData.objective} onComplete={handleObjectiveComplete} onBack={() => setStep(3)} />}
       {step === 5 && <BehavioralQuestions onComplete={handleStoriesComplete} onBack={() => setStep(step - 1)} />}
       {step === 6 && <VideoStep onComplete={handleVideoComplete} onBack={() => setStep(step - 1)} />}
@@ -195,7 +175,7 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
               onRegenerate={handleRegenerate} 
               isGenerating={isGenerating}
               isPremium={isPremium} 
-              subscriptionTier={subscriptionTier} /* 🌟 The crucial new wire */
+              subscriptionTier={subscriptionTier}
             />
           )}
         </>
@@ -208,7 +188,6 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
-  // 🌟 1. Add this new state line:
   const [subscriptionTier, setSubscriptionTier] = useState('free'); 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -222,7 +201,6 @@ export default function App() {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setIsPremium(data.isPremium || false);
-            // 🌟 2. Tell the app to listen for the specific tier!
             setSubscriptionTier(data.subscriptionTier || (data.isPremium ? 'pro' : 'free'));
           }
           setIsLoading(false); 
@@ -234,7 +212,7 @@ export default function App() {
         };
       } else {
         setIsPremium(false);
-        setSubscriptionTier('free'); // Reset on logout
+        setSubscriptionTier('free');
         setIsLoading(false);
       }
     });
@@ -253,26 +231,29 @@ export default function App() {
   }
 
   return (
-    <Routes>
-  {/* Public Pages */}
-  <Route path="/" element={<LandingPage />} />
-  <Route path="/p/:profileId" element={<PublicProfile />} />
-  
-  {/* Auth Page - Send logged-in users directly to dashboard so they don't see the login screen again */}
-  <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
-  
-  {/* 🔒 Protected Pages - Wrapped in our new Bouncer */}
- <Route 
-    path="/builder" 
-    element={
-      <ProtectedRoute user={user} isLoading={isLoading}>
-        {/* 🌟 Pass the new tier state into the BuilderFlow */}
-        <BuilderFlow isPremium={isPremium} subscriptionTier={subscriptionTier} /> 
-      </ProtectedRoute>
-    } 
-  />
+    <Router>
+      {/* 🌟 Global Navbar placed securely inside the Router but outside the page Routes */}
+      <Navbar />
 
- <Route 
+      <Routes>
+        {/* Public Pages */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/p/:profileId" element={<PublicProfile />} />
+        
+        {/* Auth Page */}
+        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
+        
+        {/* 🔒 Protected Pages */}
+        <Route 
+          path="/builder" 
+          element={
+            <ProtectedRoute user={user} isLoading={isLoading}>
+              <BuilderFlow isPremium={isPremium} subscriptionTier={subscriptionTier} /> 
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
           path="/dashboard" 
           element={
             <ProtectedRoute user={user} isLoading={isLoading}>
@@ -281,8 +262,9 @@ export default function App() {
           } 
         />
 
-  {/* Catch-all - If they type a random URL, send them home */}
-  <Route path="*" element={<Navigate to="/" />} />
-</Routes>
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
