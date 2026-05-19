@@ -6,8 +6,10 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 
 // --- PAGES & COMPONENTS ---
-import LandingPage from './LandingPage';
-import Dashboard from './Dashboard';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import LandingPage from './components/LandingPage';
+import Dashboard from './components/Dashboard';
 import AuthScreen from './AuthScreen';
 import PublicProfile from './PublicProfile';
 import ProtectedRoute from './ProtectedRoute';
@@ -21,6 +23,21 @@ import BehavioralQuestions from './BehavioralQuestions';
 import VideoStep from './VideoStep'; 
 import FinalResumeView from './FinalResumeView';
 import { generateResumeAPI } from './AIEngine';
+
+export default function App() {
+  return (
+    <Router>
+      {/* 🌟 The Navbar sits OUTSIDE the Routes so it never unmounts! */}
+      <Navbar />
+      
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* ... your other routes ... */}
+      </Routes>
+    </Router>
+  );
+}
 
 // 🔥 Progress Bar Component
 const ProgressBar = ({ currentStep, setStep }) => { 

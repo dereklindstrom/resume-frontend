@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlayCircle, BrainCircuit, FileText, ChevronRight, CheckCircle, Video, Star, Target, CheckCircle2 } from 'lucide-react';
+import { PlayCircle, BrainCircuit, FileText, ChevronRight, CheckCircle, Video, Star, Target, CheckCircle2, Layout, Sparkles } from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
 
-  // 🔥 PARALLAX ENGINE: Tracks scroll position
+  // 🔥 PARALLAX ENGINE
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -17,15 +17,10 @@ export default function LandingPage() {
   const styles = {
     page: { fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: '#0f172a', backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden' },
     
-    nav: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 5%', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 100 },
-    logo: { fontSize: '26px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.5px' },
-    logoAccent: { color: '#3b82f6', fontWeight: '900' },
-    navButtons: { display: 'flex', gap: '16px' },
-    loginBtn: { padding: '10px 20px', backgroundColor: 'transparent', color: '#475569', border: 'none', fontWeight: '600', cursor: 'pointer', fontSize: '15px' },
-    signupBtn: { padding: '10px 20px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '15px', transition: 'all 0.2s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
+    // Notice: Nav styles removed since we are using the global Navbar now!
 
     heroContainer: { position: 'relative', overflow: 'hidden', backgroundColor: '#f8fafc' },
-    hero: { position: 'relative', zIndex: 10, padding: '100px 5% 40px', textAlign: 'center', maxWidth: '1000px', margin: '0 auto' },
+    hero: { position: 'relative', zIndex: 10, padding: '80px 5% 40px', textAlign: 'center', maxWidth: '1000px', margin: '0 auto' },
     h1: { fontSize: 'clamp(48px, 6vw, 72px)', fontWeight: '800', color: '#1e293b', lineHeight: '1.1', marginBottom: '24px', letterSpacing: '-2px' },
     heroSubtitle: { fontSize: '20px', color: '#475569', lineHeight: '1.6', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px auto' },
     heroButton: { padding: '18px 36px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.4)', transition: 'all 0.2s ease' },
@@ -34,20 +29,30 @@ export default function LandingPage() {
     avatarCluster: { display: 'flex', marginLeft: '10px' },
     avatar: (z, url) => ({ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid #f8fafc', marginLeft: '-15px', zIndex: z, backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' }),
 
-    heroImageContainer: { position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '60px auto 0', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)', border: '1px solid #e2e8f0', overflow: 'hidden', padding: '10px' },
-    heroImageInner: { borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f1f5f9', aspectRatio: '16/9', backgroundImage: 'url(https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&w=1200&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' },
+    // 🎥 UPGRADED HERO DEMO VIDEO
+    heroVideoContainer: { position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '60px auto 0', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)', border: '1px solid #e2e8f0', padding: '10px' },
+    heroVideoInner: { borderRadius: '8px', overflow: 'hidden', backgroundColor: '#1e293b', aspectRatio: '16/9', position: 'relative' },
+    videoPlaceholder: { width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 },
     
-    features: { padding: '100px 5%', backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', position: 'relative', zIndex: 10 },
+    // 📸 NEW SCREENSHOT GALLERY
+    gallerySection: { padding: '100px 5%', backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', position: 'relative', zIndex: 10 },
+    galleryGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '1200px', margin: '0 auto' },
+    screenshotCard: { borderRadius: '16px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' },
+    screenshotImg: { width: '100%', height: '250px', objectFit: 'cover', borderBottom: '1px solid #e2e8f0' },
+    screenshotLabel: { padding: '16px', fontSize: '15px', fontWeight: '600', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' },
+
+    features: { padding: '100px 5%', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', position: 'relative', zIndex: 10 },
     featuresGrid: { display: 'flex', gap: '30px', maxWidth: '1200px', margin: '0 auto', flexWrap: 'wrap', justifyContent: 'center' },
-    card: { flex: '1 1 300px', backgroundColor: '#f8fafc', padding: '40px', borderRadius: '20px', border: '1px solid #e2e8f0', transition: 'transform 0.2s ease, box-shadow 0.2s ease' },
+    card: { flex: '1 1 300px', backgroundColor: '#ffffff', padding: '40px', borderRadius: '20px', border: '1px solid #e2e8f0', transition: 'transform 0.2s ease, box-shadow 0.2s ease' },
     cardIconWrapper: { width: '60px', height: '60px', backgroundColor: '#eff6ff', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', marginBottom: '24px' },
     cardTitle: { fontSize: '22px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' },
     cardText: { fontSize: '16px', color: '#64748b', lineHeight: '1.6' },
 
-    splitSection: { padding: '100px 5%', backgroundColor: '#f8fafc', maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '60px', flexWrap: 'wrap', position: 'relative', zIndex: 10 },
+    // 🎥 PREMIUM VIDEO EXAMPLES SECTION
+    splitSection: { padding: '100px 5%', backgroundColor: '#ffffff', maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '60px', flexWrap: 'wrap', position: 'relative', zIndex: 10 },
     splitContent: { flex: '1 1 400px' },
     splitImage: { flex: '1 1 400px', position: 'relative' },
-    splitImageMain: { width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.15)', objectFit: 'cover', aspectRatio: '4/5' },
+    splitVideoBox: { width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.15)', overflow: 'hidden', aspectRatio: '4/5', backgroundColor: '#1e293b' },
     badge: { position: 'absolute', bottom: '-20px', left: '-20px', backgroundColor: '#ffffff', padding: '20px', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '12px' },
 
     cta: { padding: '100px 5%', backgroundColor: '#0f172a', textAlign: 'center', color: '#ffffff', backgroundImage: 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)', position: 'relative', zIndex: 10 },
@@ -60,17 +65,7 @@ export default function LandingPage() {
   return (
     <div style={styles.page}>
       
-      {/* NAVBAR */}
-      <nav style={styles.nav}>
-        <div style={styles.logo}>
-          <BrainCircuit size={28} color="#3b82f6" />
-          <span>Resu<span style={styles.logoAccent}>ME</span></span>
-        </div>
-        <div style={styles.navButtons}>
-          <button onClick={() => navigate('/login')} style={styles.loginBtn}>Log In</button>
-          <button onClick={() => navigate('/login')} style={styles.signupBtn}>Sign Up</button>
-        </div>
-      </nav>
+      {/* 🚀 NAVBAR REMOVED: Managed globally in App.jsx */}
 
       {/* PARALLAX HERO SECTION */}
       <div style={styles.heroContainer}>
@@ -102,27 +97,73 @@ export default function LandingPage() {
           </div>
         </header>
 
+        {/* MAIN DEMO VIDEO */}
         <div style={{ padding: '0 5%' }}>
-          <div style={styles.heroImageContainer}>
+          <div style={styles.heroVideoContainer}>
             <div style={{ display: 'flex', gap: '8px', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#fca5a5' }}></div>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#fcd34d' }}></div>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#86efac' }}></div>
             </div>
-            <div style={styles.heroImageInner}>
-              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(15,23,42,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <h3 style={{ color: 'white', fontSize: '24px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase' }}>App Interface Placeholder</h3>
+            <div style={styles.heroVideoInner}>
+              {/* Replace src with your actual demo video URL */}
+              <video 
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
+                style={styles.videoPlaceholder}
+                poster="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
+              >
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              {/* Overlay play button just for visuals if you want it to look clickable */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                 <PlayCircle size={64} color="rgba(255,255,255,0.8)" strokeWidth={1.5} />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* HIGHLIGHTING THE "ME" */}
+      {/* 📸 STILL SCREENSHOT GALLERY */}
+      <section style={styles.gallerySection}>
+        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <h2 style={{ fontSize: '32px', fontWeight: '800', color: '#1e293b' }}>Inside the Platform</h2>
+          <p style={{ fontSize: '18px', color: '#64748b' }}>A clean, intuitive builder designed for executives and operations leaders.</p>
+        </div>
+        
+        <div style={styles.galleryGrid}>
+          {/* Screenshot 1 */}
+          <div style={styles.screenshotCard} className="feature-card">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="Executive Dashboard Dashboard" style={styles.screenshotImg} />
+            <div style={styles.screenshotLabel}>
+              <Layout size={18} color="#3b82f6" /> District Manager Dashboard
+            </div>
+          </div>
+          {/* Screenshot 2 */}
+          <div style={styles.screenshotCard} className="feature-card">
+            <img src="https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&w=600&q=80" alt="Sales Operations Resume Builder" style={styles.screenshotImg} />
+            <div style={styles.screenshotLabel}>
+              <BrainCircuit size={18} color="#8b5cf6" /> Power Metrics AI Engine
+            </div>
+          </div>
+          {/* Screenshot 3 */}
+          <div style={styles.screenshotCard} className="feature-card">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="125-Team Sales Bracket Metrics" style={styles.screenshotImg} />
+            <div style={styles.screenshotLabel}>
+              <Target size={18} color="#10b981" /> 1-Click ATS Export
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 🎥 PREMIUM VIDEO EXAMPLES (Left/Right Split) */}
       <section style={styles.splitSection}>
         <div style={styles.splitContent}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', fontWeight: '700', marginBottom: '16px', fontSize: '14px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            <Video size={18} /> Put a face to the name
+            <Video size={18} /> Premium Feature
           </div>
           <h2 style={{ fontSize: '36px', fontWeight: '800', color: '#1e293b', marginBottom: '24px', lineHeight: '1.2' }}>Bring your experience to life with a Video Pitch.</h2>
           <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.7', marginBottom: '32px' }}>
@@ -141,14 +182,26 @@ export default function LandingPage() {
           </ul>
         </div>
         <div style={styles.splitImage}>
-          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Professional Woman" style={styles.splitImageMain} />
+          <div style={styles.splitVideoBox}>
+            {/* Premium Feature Video Loop */}
+            <video 
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                poster="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
+              >
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+            </video>
+          </div>
           <div style={styles.badge}>
             <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
-              <PlayCircle size={24} />
+              <Sparkles size={24} />
             </div>
             <div>
               <div style={{ fontWeight: '800', color: '#1e293b', fontSize: '18px' }}>"Hi, I'm Sarah!"</div>
-              <div style={{ color: '#64748b', fontSize: '14px' }}>Click to play introduction</div>
+              <div style={{ color: '#64748b', fontSize: '14px' }}>Executive Video Intro</div>
             </div>
           </div>
         </div>
@@ -179,7 +232,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 🚀 UPGRADED PRICING SECTION */}
+      {/* 🚀 PRICING SECTION (Unchanged from your previous version) */}
       <section style={{ padding: '100px 5%', backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', position: 'relative', zIndex: 10 }}>
         
         <div style={{ textAlign: 'center', marginBottom: '60px' }}>
@@ -189,7 +242,7 @@ export default function LandingPage() {
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           
-          {/* THE FREE TIER (Standalone Top Column) */}
+          {/* THE FREE TIER */}
           <div style={{ maxWidth: '700px', margin: '0 auto 60px auto', backgroundColor: '#f8fafc', padding: '40px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' }}>Standard Base Plan</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', color: '#1e293b', marginBottom: '24px', letterSpacing: '-1px' }}>$0<span style={{ fontSize: '18px', color: '#94a3b8', fontWeight: '600' }}>/mo</span></div>
@@ -205,16 +258,13 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* DIVIDER */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '60px' }}>
             <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
             <div style={{ color: '#94a3b8', fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Or unlock premium tools</div>
             <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }}></div>
           </div>
 
-          {/* THE PAID TIERS (3-Column Grid) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', alignItems: 'stretch' }}>
-            
             {/* Pro Tier */}
             <div style={{ backgroundColor: '#ffffff', padding: '40px 30px', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#3b82f6', marginBottom: '12px' }}>Pro</h3>
@@ -223,10 +273,10 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569', fontSize: '15px' }}><CheckCircle2 size={18} color="#3b82f6" /> Video Letters of Rec</li>
                 <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569', fontSize: '15px' }}><CheckCircle2 size={18} color="#3b82f6" /> 5-Image Accomplishment Gallery</li>
               </ul>
-              <button style={{ width: '100%', padding: '14px', backgroundColor: '#eff6ff', color: '#3b82f6', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>Go Pro</button>
+              <button onClick={() => navigate('/login')} style={{ width: '100%', padding: '14px', backgroundColor: '#eff6ff', color: '#3b82f6', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>Go Pro</button>
             </div>
 
-            {/* Coach Tier (Most Popular) */}
+            {/* Coach Tier */}
             <div className="pricing-popular" style={{ backgroundColor: '#ffffff', padding: '40px 30px', borderRadius: '24px', border: '2px solid #3b82f6', display: 'flex', flexDirection: 'column', position: 'relative', boxShadow: '0 20px 40px -10px rgba(59, 130, 246, 0.15)' }}>
               <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#3b82f6', color: '#ffffff', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>Most Popular</div>
               <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>Coach</h3>
@@ -236,7 +286,7 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569', fontSize: '15px' }}><CheckCircle2 size={18} color="#3b82f6" /> Glassdoor Company Match</li>
                 <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569', fontSize: '15px' }}><CheckCircle2 size={18} color="#3b82f6" /> Live Voice Interview Coach</li>
               </ul>
-              <button style={{ width: '100%', padding: '14px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.2s' }}>Upgrade to Coach</button>
+              <button onClick={() => navigate('/login')} style={{ width: '100%', padding: '14px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.2s' }}>Upgrade to Coach</button>
             </div>
 
             {/* Premium Tier */}
@@ -247,9 +297,8 @@ export default function LandingPage() {
                 <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569', fontSize: '15px' }}><CheckCircle2 size={18} color="#8b5cf6" /> Interview Scenario Library</li>
                 <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569', fontSize: '15px' }}><CheckCircle2 size={18} color="#8b5cf6" /> Wage Negotiation Guides</li>
               </ul>
-              <button style={{ width: '100%', padding: '14px', backgroundColor: '#f3e8ff', color: '#8b5cf6', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>Get Premium</button>
+              <button onClick={() => navigate('/login')} style={{ width: '100%', padding: '14px', backgroundColor: '#f3e8ff', color: '#8b5cf6', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>Get Premium</button>
             </div>
-
           </div>
         </div>
       </section>

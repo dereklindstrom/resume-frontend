@@ -162,38 +162,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* NAVBAR */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 5%', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.5px' }}>
-            <BrainCircuit size={28} color="#3b82f6" />
-            <span>Resu<span style={{ color: '#3b82f6', fontWeight: '900' }}>ME</span></span>
-          </div>
-          
-          {/* 🌟 DISPLAY TIER OR UPGRADE BUTTON */}
-          {subscriptionTier !== 'free' ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: subscriptionTier === 'executive' ? '#ede9fe' : '#fef08a', color: subscriptionTier === 'executive' ? '#5b21b6' : '#854d0e', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase' }}>
-              <Star size={14} fill="currentColor" /> {subscriptionTier} Member
-            </div>
-          ) : (
-            <button 
-              onClick={() => setShowPricingModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#1e293b', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', border: 'none', cursor: 'pointer' }}
-            >
-              <Star size={14} fill="#eab308" color="#eab308" /> Upgrade
-            </button>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          
-
-          <button onClick={handleSignOut} style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <LogOut size={16} /> Sign Out
-          </button>
-        </div>
-      </nav>
-
+    
       {/* REST OF DASHBOARD CONTENT */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 5%' }}>
         {isSuccess && (
