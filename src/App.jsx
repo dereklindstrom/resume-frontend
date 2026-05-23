@@ -237,19 +237,16 @@ export default function App() {
       <Navbar />
 
       <Routes>
-        {/* Public Pages */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/p/:profileId" element={<PublicProfile />} />
+        <Route path="/login" element={<AuthScreen />} />
+        <Route path="/pricing" element={<PricingGate />} />
         
-        {/* Auth Page */}
-       <Route path="/login" element={<AuthScreen />} />
-        
-       {/* 🔒 Protected Pages */}
+        {/* Make sure this is exactly "/builder" */}
         <Route 
-          path="/pricing" 
+          path="/builder" 
           element={
             <ProtectedRoute user={user} isLoading={isLoading}>
-              <PricingGate />
+              <BuilderFlow isPremium={isPremium} subscriptionTier={subscriptionTier} /> 
             </ProtectedRoute>
           } 
         />
@@ -263,7 +260,7 @@ export default function App() {
           } 
         />
 
-        {/* Catch-all */}
+        {/* Catch-all throws lost users to the home page */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
