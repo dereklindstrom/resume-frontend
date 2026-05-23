@@ -11,6 +11,7 @@ import Dashboard from './Dashboard';
 import AuthScreen from './AuthScreen';
 import PublicProfile from './PublicProfile';
 import ProtectedRoute from './ProtectedRoute';
+import PricingGate from './PricingGate';
 
 // --- BUILDER STEPS ---
 import BaselineForm from './BaselineForm';
