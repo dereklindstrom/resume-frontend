@@ -92,8 +92,9 @@ export default function VideoStep({ onComplete, onBack }) {
     e.preventDefault();
     onComplete({
       hasMedia: mediaUrl !== null,
-      publicUrl: mediaUrl,
-      shape: 'circle' // We default to a modern circle layout for resumes
+      publicUrl: mediaUrl || null, // Forces null instead of undefined
+      mediaType: 'image',          // 🌟 Added this to satisfy Firebase!
+      shape: 'circle' 
     });
   };
 

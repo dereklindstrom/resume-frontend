@@ -25,11 +25,12 @@ export default function AuthScreen() {
       if (isLogin) {
         // Log existing user in
         await signInWithEmailAndPassword(auth, email, password);
+        navigate('/dashboard'); // 🌟 Returning users go straight to their dashboard
       } else {
         // Create a brand new user
         await createUserWithEmailAndPassword(auth, email, password);
+        navigate('/pricing'); // 🌟 New users are forced to the Pricing Gate!
       }
-      // If successful, App.jsx's onAuthStateChanged will automatically redirect them!
     } catch (err) {
       console.error("Auth error:", err);
       // Clean up Firebase's ugly error messages for the user

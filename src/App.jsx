@@ -241,14 +241,14 @@ export default function App() {
         <Route path="/p/:profileId" element={<PublicProfile />} />
         
         {/* Auth Page */}
-        <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <AuthScreen />} />
+       <Route path="/login" element={<AuthScreen />} />
         
-        {/* 🔒 Protected Pages */}
+       {/* 🔒 Protected Pages */}
         <Route 
-          path="/builder" 
+          path="/pricing" 
           element={
             <ProtectedRoute user={user} isLoading={isLoading}>
-              <BuilderFlow isPremium={isPremium} subscriptionTier={subscriptionTier} /> 
+              <PricingGate />
             </ProtectedRoute>
           } 
         />

@@ -37,7 +37,7 @@ export default function Navbar() {
   };
 
   // Don't show navbar on the builder canvas if you want it full screen (optional)
-  if (location.pathname === '/builder') return null;
+  // if (location.pathname === '/builder') return null;
 
   return (
     <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 5%', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1000 }}>
