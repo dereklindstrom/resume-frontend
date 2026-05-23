@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from './firebase';
-import { collection, query, where, getDocs, deleteDoc, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDocs, deleteDoc } from 'firebase/firestore'; 
 import { signOut } from 'firebase/auth';
 import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star, Check, X } from 'lucide-react';
 

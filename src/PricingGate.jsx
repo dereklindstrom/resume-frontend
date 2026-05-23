@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore'; 
+import { useNavigate } from 'react-router-dom';
 
 const STRIPE_PRICES = {
   basic: "price_1TYJ2KFq1iLZWOKqbrEZq8jN",     // $3
