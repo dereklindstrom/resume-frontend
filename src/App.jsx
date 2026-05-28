@@ -67,12 +67,31 @@ const ProgressBar = ({ currentStep, setStep }) => {
 
 // 🔥 The Main Builder Application
 function BuilderFlow({ isPremium, subscriptionTier }) { 
-  const [step, setStep] = useState(1);
-  const [userData, setUserData] = useState({ experienceLevel: 'Mid Level' });
+  // 🧠 1. Load from memory, or start fresh if memory is empty
+  const [step, setStep] = useState(() => {
+    const saved = sessionStorage.getItem('resumeStep');
+    return saved ? parseInt(saved) : 1;
+  });
+  
+  const [userData, setUserData] = useState(() => {
+    const saved = sessionStorage.getItem('resumeData');
+    return saved ? JSON.parse(saved) : { experienceLevel: 'Mid Level' };
+  });
+
+  const [finalResume, setFinalResume] = useState(() => {
+    return sessionStorage.getItem('resumeFinal') || '';
+  });
+
   const [isGenerating, setIsGenerating] = useState(false);
-  const [finalResume, setFinalResume] = useState('');
   const [editId, setEditId] = useState(null); 
   const [loadingText, setLoadingText] = useState("Waking up the AI Engine...");
+
+  // 🧠 2. Every time they type, click next, or generate... save it to memory instantly!
+  useEffect(() => {
+    sessionStorage.setItem('resumeStep', step.toString());
+    sessionStorage.setItem('resumeData', JSON.stringify(userData));
+    sessionStorage.setItem('resumeFinal', finalResume);
+  }, [step, userData, finalResume]);
   
   const loadingMessages = [
     "Analyzing your work history...",
