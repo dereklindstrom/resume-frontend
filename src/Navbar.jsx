@@ -56,11 +56,17 @@ export default function Navbar() {
         {user ? (
           <>
             {/* Logged In State */}
-            {subscriptionTier !== 'free' && (
+            {subscriptionTier !== 'free' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: subscriptionTier === 'executive' ? '#ede9fe' : '#fef08a', color: subscriptionTier === 'executive' ? '#5b21b6' : '#854d0e', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', textTransform: 'uppercase' }}>
                 <Star size={14} fill="currentColor" /> {subscriptionTier} Member
               </div>
+            ) : (
+              /* 🌟 NEW: Upgrade Button for Free Users! */
+              <button onClick={() => navigate('/pricing')} style={{ padding: '8px 16px', backgroundColor: '#10b981', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)' }}>
+                Upgrade Tier
+              </button>
             )}
+            
             <button onClick={() => navigate('/dashboard')} style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '15px' }}>
               <LayoutDashboard size={18} /> Dashboard
             </button>

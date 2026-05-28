@@ -158,6 +158,20 @@ export default function Dashboard() {
                 <button onClick={() => handleUpgradeClick('executive')} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontWeight: 'bold', cursor: 'pointer' }}>Select Executive</button>
               </div>
             </div>
+
+            {/* 🌟 THE NEW ESCAPE HATCH FOR FREE USERS */}
+            <div style={{ textAlign: 'center', marginTop: '32px' }}>
+              <button 
+                onClick={() => {
+                  setShowPricingModal(false);
+                  navigate('/builder');
+                }} 
+                style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: '600', cursor: 'pointer', fontSize: '15px', textDecoration: 'underline' }}
+              >
+                Skip for now, continue with Free tier
+              </button>
+            </div>
+            
           </div>
         </div>
       )}
@@ -180,7 +194,7 @@ export default function Dashboard() {
             <h1 style={{ fontSize: '36px', fontWeight: '800', color: '#1e293b', margin: '0 0 8px 0' }}>My Profiles</h1>
             <p style={{ fontSize: '16px', color: '#64748b', margin: 0 }}>Manage your career snapshots.</p>
           </div>
-          <button onClick={() => navigate('/builder')} style={{ padding: '14px 24px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button onClick={() => setShowPricingModal(true)} style={{ padding: '14px 24px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={18} /> Create New Profile
           </button>
         </div>
