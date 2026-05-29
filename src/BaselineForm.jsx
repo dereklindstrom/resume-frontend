@@ -1,7 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function BaselineForm({ savedData, onComplete }) {
-  // 🔥 Load saved data so the Back button works when returning to Step 1!
+  const [name, setName] = useState(savedData?.name || '');
+  const [email, setEmail] = useState(savedData?.email || '');
+  const [phone, setPhone] = useState(savedData?.phone || '');
+  const [location, setLocation] = useState(savedData?.location || '');
+  const [linkedin, setLinkedin] = useState(savedData?.linkedin || '');
+
+  // 🌟 NEW: This forces the form to update if it finds memory data!
+  useEffect(() => {
+    if (savedData) {
+      setName(savedData.name || '');
+      setEmail(savedData.email || '');
+      setPhone(savedData.phone || '');
+      setLocation(savedData.location || '');
+      setLinkedin(savedData.linkedin || '');
+    }
+  }, [savedData]);
+  
   const [formData, setFormData] = useState(
     savedData || { name: '', email: '', phone: '', location: '', linkedin: '' }
   );

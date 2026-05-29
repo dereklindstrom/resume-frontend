@@ -4,6 +4,7 @@ import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore'; 
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const STRIPE_PRICES = {
   basic: "price_1TYJ2KFq1iLZWOKqbrEZq8jN",     // $3

@@ -163,7 +163,7 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '20px' }}>
       <ProgressBar currentStep={step} setStep={setStep} />
-      {step === 1 && <BaselineForm onComplete={handleBaselineComplete} />}
+      {step === 1 && <BaselineForm savedData={userData.baseline} onComplete={handleBaselineComplete} />}      
       {step === 2 && <ExperienceFork onSelect={handleExperienceSelect} onBack={() => setStep(step - 1)} />}
       {step === 3 && (
         <ExperienceDetails 
