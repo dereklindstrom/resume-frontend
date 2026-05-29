@@ -20,16 +20,17 @@ export default function PricingGate() {
   const handleSelectFree = async () => {
     setIsProcessing(true);
     try {
-      // 1. Update their database record so we know they picked a plan
       const userRef = doc(db, 'users', auth.currentUser.uid);
-      await updateDoc(userRef, {
-        subscriptionTier: 'free'
-      });
       
-      // 2. Send them straight into the builder!
+      await setDoc(userRef, {
+        subscriptionTier: 'free'
+      }, { merge: true });
+      
       navigate('/builder');
     } catch (error) {
       console.error("Error setting free tier:", error);
+      alert("Something went wrong connecting to the database. Please check your console.");
+    } finally {
       setIsProcessing(false);
     }
   };
