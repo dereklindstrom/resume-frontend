@@ -31,11 +31,10 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   });
 
   // 🌟 NEW: The PDF Export Target & Hook
-  const resumeRef = useRef();
+  const resumeRef = useRef(null);
   const handleExportPDF = useReactToPrint({
-    content: () => resumeRef.current,
+    contentRef: resumeRef, // 👈 The new v3 way!
     documentTitle: `${userData?.baseline?.name ? userData.baseline.name.replace(/\s+/g, '_') : 'My'}_ResuME`,
-    removeAfterPrint: true,
   });
 
   const layoutOptions = [
