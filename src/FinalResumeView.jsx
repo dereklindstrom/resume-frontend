@@ -254,11 +254,72 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
           .metrics-toggle { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 16px; transition: all 0.3s ease; } .metrics-toggle summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; list-style: none; outline: none; } .metrics-toggle summary::-webkit-details-marker { display: none; } .metrics-list { margin: 12px 0 0 0; padding-left: 24px; font-size: 14.5px; line-height: 1.8; color: var(--text); }
           
           @media print {
-            @page { size: letter portrait; margin: 0; } body { background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .no-print { display: none !important; }
-            .resume-container { box-shadow: none !important; border-radius: 0 !important; margin: 0 !important; padding: 0.4in 0.5in !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; min-height: 100vh !important; }
-            .layout-signature { display: grid !important; grid-template-columns: 200px 1fr !important; gap: 20px !important; } .sidebar-rail, .main-content { padding: 0 !important; background: transparent !important; border: none !important; }
-            .name-header { font-size: 28pt !important; margin-bottom: 2px !important; line-height: 1 !important; } .title-header { font-size: 12pt !important; margin-bottom: 12px !important; } .section-title { font-size: 10pt !important; margin-bottom: 8px !important; padding-bottom: 4px !important; }
-            p, span, li, .metrics-list { font-size: 9.5pt !important; line-height: 1.3 !important; }
+            @page { size: letter portrait; margin: 0; } 
+            body { background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+            .no-print { display: none !important; }
+            
+            /* 1. Remove fixed heights so the browser can measure pages naturally */
+            .resume-container { 
+              box-shadow: none !important; 
+              border-radius: 0 !important; 
+              margin: 0 !important; 
+              padding: 0.4in 0.5in !important; 
+              width: 100% !important; 
+              max-width: 100% !important; 
+              box-sizing: border-box !important; 
+              min-height: auto !important; /* Fixed! */
+              height: auto !important; 
+              display: block !important; 
+            }
+            .resume-container::after { content: ""; display: table; clear: both; } /* Clear floats */
+
+            /* 2. The "Bulletproof Print Layout" (Replaces Grid/Flex with Floats) */
+            .layout-signature { display: block !important; } 
+            .layout-signature .sidebar-rail { 
+              float: left !important; 
+              width: 220px !important; 
+              padding: 0 !important; 
+              background: transparent !important; 
+              border: none !important; 
+            }
+            .layout-signature .main-content { 
+              margin-left: 250px !important; 
+              padding: 0 !important; 
+              display: block !important; 
+            }
+            .layout-startup { display: block !important; }
+            .layout-startup .sidebar-rail, .layout-executive .sidebar-rail { display: block !important; padding: 0 0 20px 0 !important; border-bottom: 2px solid #e2e8f0 !important; margin-bottom: 20px !important;}
+            .layout-executive .main-content { display: block !important; padding: 0 !important; }
+
+            /* 3. Typography Adjustments */
+            .name-header { font-size: 26pt !important; margin-bottom: 4px !important; line-height: 1 !important; } 
+            .title-header { font-size: 12pt !important; margin-bottom: 16px !important; } 
+            .section-title { font-size: 11pt !important; margin-bottom: 12px !important; padding-bottom: 4px !important; margin-top: 16px !important; }
+            p, span, li, .metrics-list { font-size: 9.5pt !important; line-height: 1.4 !important; }
+            
+            /* 4. Strict Page Break Rules */
+            .job-item { 
+              margin-bottom: 20px !important; 
+              page-break-inside: avoid !important; 
+              break-inside: avoid !important; 
+              display: block !important; 
+            } 
+            .experience-header, .section-title, h1, h2, h3, h4 { 
+              page-break-after: avoid !important; 
+              break-after: avoid !important; 
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            } 
+            
+            /* 5. Clean up interactive elements */
+            .experience-header h4 { font-size: 11pt !important; }
+            .metrics-toggle summary { display: none !important; } 
+            .metrics-toggle { background: transparent !important; border: none !important; padding: 0 !important; display: block !important; } 
+            .metrics-list { display: block !important; margin-top: 4px !important; padding-left: 15px !important; }
+            .skills-container { page-break-inside: avoid !important; break-inside: avoid !important; display: block !important; }
+            .video-module-print-hide > div { width: 120px !important; height: 120px !important; border-width: 2px !important; } 
+            input, textarea { border: none !important; background: transparent !important; resize: none !important; padding: 0 !important; }
+          }
             /* 🌟 THE PDF BREAK FIXES */
 .job-item { 
   margin-bottom: 20px !important; 
