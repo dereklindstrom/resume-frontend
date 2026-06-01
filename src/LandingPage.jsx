@@ -17,6 +17,53 @@ export default function LandingPage() {
   const styles = {
     page: { fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: '#0f172a', backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden' },
     
+    // 🌟 NEW FOOTER STYLES
+    footer: { 
+      backgroundColor: '#ffffff', 
+      borderTop: '1px solid #e2e8f0', 
+      padding: '48px 5% 32px 5%', 
+      marginTop: '64px' 
+    },
+    footerContent: { 
+      maxWidth: '1200px', 
+      margin: '0 auto', 
+      display: 'flex', 
+      flexWrap: 'wrap', 
+      justifyContent: 'space-between', 
+      alignItems: 'center', 
+      gap: '24px' 
+    },
+    footerLogo: { 
+      fontSize: '20px', 
+      fontWeight: '800', 
+      color: '#1e293b', 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '8px', 
+      letterSpacing: '-0.5px' 
+    },
+    footerLinks: { 
+      display: 'flex', 
+      gap: '24px', 
+      flexWrap: 'wrap' 
+    },
+    footerLink: { 
+      color: '#64748b', 
+      fontSize: '14px', 
+      textDecoration: 'none', 
+      fontWeight: '500', 
+      cursor: 'pointer',
+      transition: 'color 0.2s ease'
+    },
+    copyright: { 
+      color: '#94a3b8', 
+      fontSize: '14px', 
+      width: '100%', 
+      textAlign: 'center', 
+      marginTop: '32px', 
+      paddingTop: '32px', 
+      borderTop: '1px solid #f1f5f9' 
+    },
     // Notice: Nav styles removed since we are using the global Navbar now!
 
     heroContainer: { position: 'relative', overflow: 'hidden', backgroundColor: '#f8fafc' },
@@ -29,6 +76,7 @@ export default function LandingPage() {
     avatarCluster: { display: 'flex', marginLeft: '10px' },
     avatar: (z, url) => ({ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid #f8fafc', marginLeft: '-15px', zIndex: z, backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' }),
 
+    
     // 🎥 UPGRADED HERO DEMO VIDEO
     heroVideoContainer: { position: 'relative', zIndex: 10, maxWidth: '1000px', margin: '60px auto 0', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)', border: '1px solid #e2e8f0', padding: '10px' },
     heroVideoInner: { borderRadius: '8px', overflow: 'hidden', backgroundColor: '#1e293b', aspectRatio: '16/9', position: 'relative' },
@@ -48,6 +96,8 @@ export default function LandingPage() {
     cardTitle: { fontSize: '22px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' },
     cardText: { fontSize: '16px', color: '#64748b', lineHeight: '1.6' },
 
+    
+
     // 🎥 PREMIUM VIDEO EXAMPLES SECTION
     splitSection: { padding: '100px 5%', backgroundColor: '#ffffff', maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '60px', flexWrap: 'wrap', position: 'relative', zIndex: 10 },
     splitContent: { flex: '1 1 400px' },
@@ -58,8 +108,8 @@ export default function LandingPage() {
     cta: { padding: '100px 5%', backgroundColor: '#0f172a', textAlign: 'center', color: '#ffffff', backgroundImage: 'radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)', position: 'relative', zIndex: 10 },
     ctaH2: { fontSize: '40px', fontWeight: '800', marginBottom: '20px' },
     ctaText: { fontSize: '18px', color: '#94a3b8', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px auto' },
-    
-    footer: { padding: '30px 5%', backgroundColor: '#020617', color: '#475569', textAlign: 'center', fontSize: '14px', position: 'relative', zIndex: 10 }
+      
+  
   };
 
   return (
@@ -312,9 +362,22 @@ export default function LandingPage() {
         </button>
       </section>
 
-      {/* FOOTER */}
+     {/* 🛑 FOOTER SECTION */}
       <footer style={styles.footer}>
-        <p>© {new Date().getFullYear()} ResuME. All rights reserved.</p>
+        <div style={styles.footerContent}>
+          <div style={styles.footerLogo}>
+            <BrainCircuit size={24} color="#3b82f6" />
+            <span>Resu<span style={{ color: '#3b82f6', fontWeight: '900' }}>ME</span></span>
+          </div>
+          <div style={styles.footerLinks}>
+            <span style={styles.footerLink}>Terms of Service</span>
+            <span style={styles.footerLink}>Privacy Policy</span>
+            <span style={styles.footerLink}>Contact Support</span>
+          </div>
+          <div style={styles.copyright}>
+            © {new Date().getFullYear()} ResuME. All rights reserved.
+          </div>
+        </div>
       </footer>
 
       {/* Hover Effects & Media Queries */}
