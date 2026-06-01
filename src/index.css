@@ -109,3 +109,32 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* 🖨️ PERFECT PDF PRINTING SETTINGS */
+@media print {
+  /* Force the browser to render background colors and images */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: white !important;
+  }
+  
+  /* Remove the browser's default headers/footers and margins */
+  @page {
+    margin: 0; 
+    size: letter;
+  }
+
+  /* Add this class to any buttons or navbars you don't want in the PDF */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure the resume itself takes up the full page perfectly */
+  .print-container {
+    margin: 0 !important;
+    padding: 20px 40px !important;
+    width: 100% !important;
+    box-shadow: none !important;
+  }
+}

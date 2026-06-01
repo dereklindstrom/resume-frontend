@@ -1,18 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock } from 'lucide-react'; // 🌟 Added Lock icon
+import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useReactToPrint } from 'react-to-print';
 
 import { db, storage, auth } from './firebase'; 
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
-// 🌟 Added isPremium to the props
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free' }) {  const [activeView, setActiveView] = useState('resume'); 
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free' }) {  
+  const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
-  // 🌟 NEW: Advanced Theme State
-  const [themeMode, setThemeMode] = useState('preset'); // 'preset' or 'custom'
+  
+  // 🌟 Advanced Theme State
+  const [themeMode, setThemeMode] = useState('preset'); 
   const [customTheme, setCustomTheme] = useState({
     primary: '#1e3a8a',
     accent: '#3b82f6',
@@ -21,14 +23,21 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     font: '"Plus Jakarta Sans", sans-serif'
   });
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   
   const [editableData, setEditableData] = useState({ 
     summary: "Loading profile...", skills: [], experience: [], education: {}, 
     coaching: { suggestedRoles: ["Loading..."], skillGaps: [] } 
   });
 
-  // 🌟 Define layout options and their premium status
+  // 🌟 NEW: The PDF Export Target & Hook
+  const resumeRef = useRef();
+  const handleExportPDF = useReactToPrint({
+    content: () => resumeRef.current,
+    documentTitle: `${userData?.baseline?.name ? userData.baseline.name.replace(/\s+/g, '_') : 'My'}_ResuME`,
+    removeAfterPrint: true,
+  });
+
   const layoutOptions = [
     { id: 'signature', name: 'Signature', isPremiumOnly: false },
     { id: 'startup', name: 'Startup', isPremiumOnly: true },
@@ -119,11 +128,37 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const updateMetric = (jobIndex, metricIndex, value) => { const newExp = [...editableData.experience]; newExp[jobIndex].metrics[metricIndex] = value; setEditableData({ ...editableData, experience: newExp }); };
   const updateSkill = (index, value) => { const newSkills = [...editableData.skills]; newSkills[index] = value; setEditableData({ ...editableData, skills: newSkills }); };
 
-  const handlePrintRequest = () => { setIsEditingText(false); if (activeView !== 'resume') setActiveView('resume'); setTimeout(() => { if (media.mediaType === 'video' && !pdfAction) setShowPrintModal(true); else window.print(); }, 100); };
+  // 🌟 REPLACED window.print() with handleExportPDF()
+  const handlePrintRequest = () => { 
+    setIsEditingText(false); 
+    if (activeView !== 'resume') setActiveView('resume'); 
+    setTimeout(() => { 
+      if (media.mediaType === 'video' && !pdfAction) setShowPrintModal(true); 
+      else handleExportPDF(); 
+    }, 100); 
+  };
+  
   const startPrintCamera = async () => { try { setPrintStream(await navigator.mediaDevices.getUserMedia({ video: true })); } catch (error) { alert("Camera access needed."); } };
   const handlePrintVideoMount = (element) => { printVideoRef.current = element; if (element && printStream) { element.srcObject = printStream; element.onloadedmetadata = () => { element.play().catch(e => console.error(e)); }; } };
-  const takePrintPhoto = () => { if (printVideoRef.current && printCanvasRef.current) { const video = printVideoRef.current; const canvas = printCanvasRef.current; canvas.width = video.videoWidth; canvas.height = video.videoHeight; const ctx = canvas.getContext('2d'); ctx.translate(canvas.width, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, canvas.width, canvas.height); setPrintPhotoUrl(canvas.toDataURL('image/jpeg', 0.9)); if (printStream) printStream.getTracks().forEach(t => t.stop()); setPrintStream(null); setPdfAction('photo'); setShowPrintModal(false); setTimeout(() => window.print(), 100); } };
-  const skipPrintPhoto = () => { if (printStream) printStream.getTracks().forEach(t => t.stop()); setPrintStream(null); setPdfAction('remove'); setShowPrintModal(false); setTimeout(() => window.print(), 100); };
+  
+  // 🌟 REPLACED window.print() with handleExportPDF()
+  const takePrintPhoto = () => { 
+    if (printVideoRef.current && printCanvasRef.current) { 
+      const video = printVideoRef.current; const canvas = printCanvasRef.current; canvas.width = video.videoWidth; canvas.height = video.videoHeight; 
+      const ctx = canvas.getContext('2d'); ctx.translate(canvas.width, 0); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, canvas.width, canvas.height); 
+      setPrintPhotoUrl(canvas.toDataURL('image/jpeg', 0.9)); 
+      if (printStream) printStream.getTracks().forEach(t => t.stop()); 
+      setPrintStream(null); setPdfAction('photo'); setShowPrintModal(false); 
+      setTimeout(() => handleExportPDF(), 100); 
+    } 
+  };
+  
+  // 🌟 REPLACED window.print() with handleExportPDF()
+  const skipPrintPhoto = () => { 
+    if (printStream) printStream.getTracks().forEach(t => t.stop()); 
+    setPrintStream(null); setPdfAction('remove'); setShowPrintModal(false); 
+    setTimeout(() => handleExportPDF(), 100); 
+  };
 
   const handlePublish = async () => {
     setIsPublishing(true);
@@ -181,6 +216,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       </div>
     );
   };
+  
 
   return (
     <>
@@ -322,7 +358,6 @@ h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !importa
 
             {/* RIGHT: Document-Specific Actions (Prominent Buttons) */}
             <div style={{ display: 'flex', gap: '12px' }}>
-              {/* 🌟 UPGRADED: Regenerate button highlights Power Metrics if Premium */}
               <button onClick={onRegenerate} disabled={isGenerating} style={{ padding: '10px 20px', backgroundColor: isPremium ? 'rgba(245, 158, 11, 0.1)' : 'transparent', border: '1px solid #f59e0b', color: '#fbbf24', borderRadius: '8px', cursor: isGenerating ? 'not-allowed' : 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', opacity: isGenerating ? 0.5 : 1 }}>
                 <RefreshCw size={16} className={isGenerating ? "spin-animation" : ""} /> 
                 {isGenerating ? 'Drafting...' : (isPremium ? '✨ Power Regenerate' : 'Regenerate')}
@@ -519,7 +554,8 @@ h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !importa
 
         {/* 📄 RESUME VIEW */}
         <div style={{ display: activeView === 'resume' ? 'block' : 'none' }}>
-           <div className={`resume-container layout-${layout}`}>
+           {/* 🌟 NEW: The ref goes here! */}
+           <div ref={resumeRef} className={`resume-container print-container layout-${layout}`}>
             {(layout === 'signature' || layout === 'startup') && (
               <div className="sidebar-rail">
                 <RenderMedia />
