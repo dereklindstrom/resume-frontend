@@ -254,42 +254,26 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
           .metrics-toggle { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 16px; transition: all 0.3s ease; } .metrics-toggle summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; list-style: none; outline: none; } .metrics-toggle summary::-webkit-details-marker { display: none; } .metrics-list { margin: 12px 0 0 0; padding-left: 24px; font-size: 14.5px; line-height: 1.8; color: var(--text); }
           
           @media print {
-            @page { size: letter portrait; margin: 0; } 
+            /* 1. Add physical paper margins to the top and bottom of EVERY page */
+            @page { size: letter portrait; margin: 0.5in 0; } 
+            
             body { background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
             .no-print { display: none !important; }
             
-            /* 1. Remove fixed heights so the browser can measure pages naturally */
+            /* 2. Remove the container's top/bottom padding so it doesn't double up on Page 1 */
             .resume-container { 
               box-shadow: none !important; 
               border-radius: 0 !important; 
               margin: 0 !important; 
-              padding: 0.4in 0.5in !important; 
+              padding: 0 0.5in !important; /* 👈 Changed this line to 0 on top/bottom */
               width: 100% !important; 
               max-width: 100% !important; 
               box-sizing: border-box !important; 
-              min-height: auto !important; /* Fixed! */
+              min-height: auto !important; 
               height: auto !important; 
               display: block !important; 
             }
-            .resume-container::after { content: ""; display: table; clear: both; } /* Clear floats */
-
-            /* 2. The "Bulletproof Print Layout" (Replaces Grid/Flex with Floats) */
-            .layout-signature { display: block !important; } 
-            .layout-signature .sidebar-rail { 
-              float: left !important; 
-              width: 220px !important; 
-              padding: 0 !important; 
-              background: transparent !important; 
-              border: none !important; 
-            }
-            .layout-signature .main-content { 
-              margin-left: 250px !important; 
-              padding: 0 !important; 
-              display: block !important; 
-            }
-            .layout-startup { display: block !important; }
-            .layout-startup .sidebar-rail, .layout-executive .sidebar-rail { display: block !important; padding: 0 0 20px 0 !important; border-bottom: 2px solid #e2e8f0 !important; margin-bottom: 20px !important;}
-            .layout-executive .main-content { display: block !important; padding: 0 !important; }
+            .resume-container::after { content: ""; display: table; clear: both; }
 
             /* 3. Typography Adjustments */
             .name-header { font-size: 26pt !important; margin-bottom: 4px !important; line-height: 1 !important; } 
