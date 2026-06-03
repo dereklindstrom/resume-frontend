@@ -624,23 +624,7 @@ h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !importa
                 {/* 🔥 MODERN PROFESSIONAL HEADLINE */}
                 <h2 className="title-header">{targetRole}</h2>
 
-                {userData?.media?.hasMedia && userData?.media?.publicUrl && (
-  <div style={{ float: 'right', marginLeft: '24px', marginBottom: '16px' }}>
-    <img 
-      src={userData.media.publicUrl} 
-      alt="Profile" 
-      style={{ 
-        width: '120px', 
-        height: '120px', 
-        objectFit: 'cover',
-        borderRadius: userData.media.shape === 'circle' ? '50%' : '12px',
-        border: '3px solid #e2e8f0',
-        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
-      }} 
-    />
-  </div>
-)}
-                
+                               
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', color: 'var(--text)', opacity: 0.8, fontSize: '14.5px', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> {phone}</span><span style={{ opacity: 0.3 }}>|</span><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={14} /> {email}</span>
                 </div>
