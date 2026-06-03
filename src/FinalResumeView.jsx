@@ -223,29 +223,36 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
         {`
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
           .resume-container { 
-  --primary: ${appliedColors.primary}; 
-  --accent: ${appliedColors.accent}; 
-  --bg: ${appliedColors.bg}; 
-  /* Fallback sidebar color if custom, otherwise use preset sidebar */
-  --sidebar: ${themeMode === 'custom' ? appliedColors.bg : appliedColors.sidebar}; 
-  --text: ${appliedColors.text}; 
-  --font: ${appliedFont}; 
-  
-  font-family: var(--font); 
-  background: var(--bg); 
-  color: var(--text); 
-  border-radius: 0 0 16px 16px; 
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
-  min-height: 850px; 
-  display: flex; 
-  flex-direction: column; 
-}
+            --primary: ${appliedColors.primary}; 
+            --accent: ${appliedColors.accent}; 
+            --bg: ${appliedColors.bg}; 
+            --sidebar: ${themeMode === 'custom' ? appliedColors.bg : appliedColors.sidebar}; 
+            --text: ${appliedColors.text}; 
+            --font: ${appliedFont}; 
+            
+            font-family: var(--font); 
+            background: var(--bg); 
+            color: var(--text); 
+            border-radius: 0 0 16px 16px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+            min-height: 850px; 
+            display: flex; 
+            flex-direction: column; 
+          }
           .resume-container h1, .resume-container h2, .resume-container h3, .resume-container h4, .resume-container p { margin: 0; }
-          .sidebar-rail { background: var(--sidebar); padding: 50px 40px; border-right: 1px solid rgba(0,0,0,0.05); } .main-content { padding: 60px; flex: 1; text-align: left; }
-          .layout-signature { flex-direction: row; } .layout-signature .sidebar-rail { flex: 0 0 320px; max-width: 320px; } .layout-signature .main-content { flex: 1; max-width: none; }
+          
+          /* 🌟 NARROWER SIDEBAR & EQUALIZED TOP PADDING */
+          .sidebar-rail { background: var(--sidebar); padding: 40px 24px; border-right: 1px solid rgba(0,0,0,0.05); } 
+          .main-content { padding: 40px 30px; flex: 1; text-align: left; }
+          .layout-signature { flex-direction: row; } 
+          .layout-signature .sidebar-rail { flex: 0 0 230px; max-width: 230px; } /* Slimmed down from 320px */
+          .layout-signature .main-content { flex: 1; max-width: none; }
+          
           .layout-startup { flex-direction: column; } .layout-startup .sidebar-rail { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.05); padding: 40px 60px; }
           .layout-executive .main-content { max-width: 850px; margin: 0 auto; text-align: center; } .layout-executive .experience-header { flex-direction: column; align-items: center; } .layout-executive .metrics-toggle summary { justify-content: center; } .layout-executive .metrics-list { list-style-position: inside; }
-          .name-header { font-size: clamp(36px, 5vw, 56px); font-weight: ${activeTypo.nameWeight}; color: var(--primary); letter-spacing: -1px; margin-bottom: 12px !important; line-height: 1.1; }
+          
+          /* 🌟 NAME ALIGNMENT FIX: Removed line-height gap so it sits flush with photo */
+          .name-header { font-size: clamp(36px, 5vw, 56px); font-weight: ${activeTypo.nameWeight}; color: var(--primary); letter-spacing: -1px; margin-bottom: 8px !important; line-height: 0.9; margin-top: -4px; }
           .title-header { font-size: 18px; color: var(--accent); text-transform: ${activeTypo.headingStyle}; letter-spacing: 3px; font-weight: 600; margin-bottom: 30px !important; display: block; }
           .section-title { font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px !important; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 12px; display: flex; alignItems: center; gap: 8px; }
           .skills-container { display: flex; flex-wrap: wrap; gap: 10px; } .layout-executive .skills-container { justify-content: center; }
@@ -254,18 +261,16 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
           .metrics-toggle { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 16px; transition: all 0.3s ease; } .metrics-toggle summary { cursor: pointer; font-size: 13px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; list-style: none; outline: none; } .metrics-toggle summary::-webkit-details-marker { display: none; } .metrics-list { margin: 12px 0 0 0; padding-left: 24px; font-size: 14.5px; line-height: 1.8; color: var(--text); }
           
           @media print {
-            /* 1. Add physical paper margins to the top and bottom of EVERY page */
             @page { size: letter portrait; margin: 0.5in 0; } 
-            
             body { background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
             .no-print { display: none !important; }
             
-            /* 2. Remove the container's top/bottom padding so it doesn't double up on Page 1 */
+            /* 🌟 NARROWED OUTSIDE PDF MARGINS (Changed from 0.5in to 0.3in) */
             .resume-container { 
               box-shadow: none !important; 
               border-radius: 0 !important; 
               margin: 0 !important; 
-              padding: 0 0.5in !important; /* 👈 Changed this line to 0 on top/bottom */
+              padding: 0 0.3in !important; 
               width: 100% !important; 
               max-width: 100% !important; 
               box-sizing: border-box !important; 
@@ -275,57 +280,43 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
             }
             .resume-container::after { content: ""; display: table; clear: both; }
 
-            /* 3. Typography Adjustments */
-            .name-header { font-size: 26pt !important; margin-bottom: 4px !important; line-height: 1 !important; } 
+            .layout-signature { display: block !important; } 
+            
+            /* 🌟 THINNER PRINT SIDEBAR (Changed from 220px to 170px) */
+            .layout-signature .sidebar-rail { 
+              float: left !important; 
+              width: 170px !important; 
+              padding: 0 !important; 
+              background: transparent !important; 
+              border: none !important; 
+            }
+            
+            /* 🌟 PULLED CONTENT LEFT (Changed from 250px to 190px) */
+            .layout-signature .main-content { 
+              margin-left: 190px !important; 
+              padding: 0 !important; 
+              display: block !important; 
+            }
+            
+            .layout-startup { display: block !important; }
+            .layout-startup .sidebar-rail, .layout-executive .sidebar-rail { display: block !important; padding: 0 0 20px 0 !important; border-bottom: 2px solid #e2e8f0 !important; margin-bottom: 20px !important;}
+            .layout-executive .main-content { display: block !important; padding: 0 !important; }
+
+            .name-header { font-size: 26pt !important; margin-bottom: 4px !important; line-height: 1 !important; margin-top: 0 !important; } 
             .title-header { font-size: 12pt !important; margin-bottom: 16px !important; } 
             .section-title { font-size: 11pt !important; margin-bottom: 12px !important; padding-bottom: 4px !important; margin-top: 16px !important; }
             p, span, li, .metrics-list { font-size: 9.5pt !important; line-height: 1.4 !important; }
             
-            /* 4. Strict Page Break Rules */
-            .job-item { 
-              margin-bottom: 20px !important; 
-              page-break-inside: avoid !important; 
-              break-inside: avoid !important; 
-              display: block !important; 
-            } 
-            .experience-header, .section-title, h1, h2, h3, h4 { 
-              page-break-after: avoid !important; 
-              break-after: avoid !important; 
-              page-break-inside: avoid !important;
-              break-inside: avoid !important;
-            } 
+            .job-item { margin-bottom: 20px !important; page-break-inside: avoid !important; break-inside: avoid !important; display: block !important; position: relative !important; } 
+            .experience-header, .section-title, h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !important; page-break-inside: avoid !important; break-inside: avoid !important; } 
             
-            /* 5. Clean up interactive elements */
             .experience-header h4 { font-size: 11pt !important; }
             .metrics-toggle summary { display: none !important; } 
             .metrics-toggle { background: transparent !important; border: none !important; padding: 0 !important; display: block !important; } 
             .metrics-list { display: block !important; margin-top: 4px !important; padding-left: 15px !important; }
             .skills-container { page-break-inside: avoid !important; break-inside: avoid !important; display: block !important; }
-            .video-module-print-hide > div { width: 120px !important; height: 120px !important; border-width: 2px !important; } 
+            .video-module-print-hide > div { width: 120px !important; height: 120px !important; border-width: 2px !important; margin-top: 0 !important; } 
             input, textarea { border: none !important; background: transparent !important; resize: none !important; padding: 0 !important; }
-          }
-            /* 🌟 THE PDF BREAK FIXES */
-.job-item { 
-  margin-bottom: 20px !important; 
-  page-break-inside: avoid !important; 
-  break-inside: avoid !important; 
-  display: block !important; /* Forces the browser to respect the break */
-  position: relative !important;
-} 
-.experience-header, .section-title { 
-  margin-bottom: 4px !important; 
-  page-break-after: avoid !important; 
-  break-after: avoid !important; 
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
-} 
-.experience-header h4 { font-size: 11pt !important; }
-.metrics-toggle summary { display: none !important; } 
-.metrics-toggle { background: transparent !important; border: none !important; padding: 0 !important; display: block !important; } 
-.metrics-list { display: block !important; margin-top: 4px !important; padding-left: 15px !important; }
-h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !important; }
-/* Prevent the skills container from breaking awkwardly */
-.skills-container { page-break-inside: avoid !important; break-inside: avoid !important; display: block !important; }.video-module-print-hide > div { width: 120px !important; height: 120px !important; border-width: 2px !important; } input, textarea { border: none !important; background: transparent !important; resize: none !important; padding: 0 !important; }
           }
           @media screen { .print-photo { display: none !important; } .web-video { display: block !important; } }
         `}
