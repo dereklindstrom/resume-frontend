@@ -208,11 +208,12 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
               resumeText={finalResume} 
               userData={userData} 
               editId={editId} 
-              onReset={handleReset} // ✅ Replaced with our new function!
+              onReset={handleReset} 
               onRegenerate={handleRegenerate} 
               isGenerating={isGenerating}
               isPremium={isPremium} 
               subscriptionTier={subscriptionTier}
+              onEditMedia={() => setStep(6)} // 👈 ADD THIS ONE NEW LINE!
             />
           )}
         </>

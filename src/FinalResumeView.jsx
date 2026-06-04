@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock } from 'lucide-react';
+import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 
@@ -8,7 +8,8 @@ import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free' }) {  
+// 🌟 ADDED onEditMedia to the props!
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free', onEditMedia }) {  
   const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
@@ -28,6 +29,15 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     summary: "Loading profile...", skills: [], experience: [], education: {}, 
     coaching: { suggestedRoles: ["Loading..."], skillGaps: [] } 
   });
+
+  // 🌟 NEW: Local Media State so we can "Remove" it instantly from the UI
+  const [localMedia, setLocalMedia] = useState(userData?.media || { hasMedia: false, mediaType: 'none' });
+
+  useEffect(() => {
+    if (userData?.media) {
+      setLocalMedia(userData.media);
+    }
+  }, [userData?.media]);
 
   const resumeRef = useRef(null);
   const handleExportPDF = useReactToPrint({
@@ -82,33 +92,11 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     }
   };
   
-  useEffect(() => {
-    if (!resumeText) return;
-    let parsed = { summary: "", skills: [], experience: [], education: {}, coaching: { suggestedRoles: [], skillGaps: [] } };
-    try {
-      if (typeof resumeText === 'string') {
-        const startIndex = resumeText.indexOf('{');
-        const endIndex = resumeText.lastIndexOf('}');
-        if (startIndex !== -1 && endIndex !== -1) {
-          parsed = JSON.parse(resumeText.substring(startIndex, endIndex + 1));
-        }
-      } else if (typeof resumeText === 'object') {
-        parsed = JSON.parse(JSON.stringify(resumeText));
-      }
-    } catch (e) {}
-    
-    if (!parsed.coaching) parsed.coaching = { suggestedRoles: ["Data Processing..."], skillGaps: [] };
-    setEditableData(parsed);
-  }, [resumeText]);
-
   const { name = "Derek Lindstrom", email = "email@example.com", phone = "(555) 555-5555" } = userData?.baseline || {};
   const targetRole = userData?.objective?.targetRole || "Professional Resume";
   const showEdu = userData?.experienceDetails?.showEdu || false;
-  
   const staticEducation = Array.isArray(userData?.experienceDetails?.eduDetails) ? userData.experienceDetails.eduDetails : [];
     
-  const media = userData?.media || { hasMedia: false, mediaType: 'none' };
-
   const palettes = { cobalt: { primary: '#1e3a8a', accent: '#3b82f6', bg: '#ffffff', sidebar: '#f8fafc', text: '#334155' }, sage: { primary: '#2f3e46', accent: '#52796f', bg: '#ffffff', sidebar: '#cad2c5', text: '#354f52' }, terracotta: { primary: '#780000', accent: '#c1121f', bg: '#fffdf7', sidebar: '#fdf0d5', text: '#333333' }, midnight: { primary: '#f8fafc', accent: '#38bdf8', bg: '#0f172a', sidebar: '#1e293b', text: '#cbd5e1' }, monochrome: { primary: '#171717', accent: '#737373', bg: '#ffffff', sidebar: '#fafafa', text: '#404040' } };
   const typography = { signature: { font: '"Plus Jakarta Sans", sans-serif', nameWeight: 800, headingStyle: 'uppercase' }, startup: { font: '"Outfit", sans-serif', nameWeight: 600, headingStyle: 'capitalize' }, executive: { font: '"Playfair Display", serif', nameWeight: 700, headingStyle: 'uppercase' } };
    
@@ -120,7 +108,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const updateMetric = (jobIndex, metricIndex, value) => { const newExp = [...editableData.experience]; newExp[jobIndex].metrics[metricIndex] = value; setEditableData({ ...editableData, experience: newExp }); };
   const updateSkill = (index, value) => { const newSkills = [...editableData.skills]; newSkills[index] = value; setEditableData({ ...editableData, skills: newSkills }); };
 
-  const handlePrintRequest = () => { setIsEditingText(false); if (activeView !== 'resume') setActiveView('resume'); setTimeout(() => { if (media.mediaType === 'video' && !pdfAction) setShowPrintModal(true); else handleExportPDF(); }, 100); };
+  const handlePrintRequest = () => { setIsEditingText(false); if (activeView !== 'resume') setActiveView('resume'); setTimeout(() => { if (localMedia.mediaType === 'video' && !pdfAction) setShowPrintModal(true); else handleExportPDF(); }, 100); };
   const startPrintCamera = async () => { try { setPrintStream(await navigator.mediaDevices.getUserMedia({ video: true })); } catch (error) { alert("Camera access needed."); } };
   const handlePrintVideoMount = (element) => { printVideoRef.current = element; if (element && printStream) { element.srcObject = printStream; element.onloadedmetadata = () => { element.play().catch(e => console.error(e)); }; } };
   
@@ -131,16 +119,21 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     setIsPublishing(true);
     try {
       let publicMediaUrl = null;
-      const activeMediaUrl = printPhotoUrl || media.videoUrl || media.photoUrl;
-      if (activeMediaUrl) {
+      const activeMediaUrl = printPhotoUrl || localMedia.videoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.url;
+      
+      // Only upload if it's a blob/local URL, otherwise just save the existing string
+      if (activeMediaUrl && activeMediaUrl.startsWith('blob:')) {
         const response = await fetch(activeMediaUrl); const blob = await response.blob(); const fileRef = ref(storage, `media/${Date.now()}-profile`);
         await uploadBytes(fileRef, blob); publicMediaUrl = await getDownloadURL(fileRef);
+      } else {
+        publicMediaUrl = activeMediaUrl;
       }
+
       const docRef = await addDoc(collection(db, "resumes"), {
         userId: auth.currentUser.uid, profileData: editableData,
         userData: { baseline: userData.baseline, objective: userData.objective, experienceDetails: userData.experienceDetails },
         design: { layout, palette },
-        media: { hasMedia: !!activeMediaUrl || media.hasMedia, mediaType: printPhotoUrl ? 'photo' : media.mediaType, shape: media.shape || 'circle', publicUrl: publicMediaUrl },
+        media: { hasMedia: !!publicMediaUrl || localMedia.hasMedia, mediaType: printPhotoUrl ? 'photo' : localMedia.mediaType, shape: localMedia.shape || 'circle', publicUrl: publicMediaUrl },
         createdAt: new Date().toISOString()
       });
       setPublishId(docRef.id);
@@ -150,53 +143,81 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
 
   const inputStyle = { width: '100%', background: isEditingText ? 'rgba(56, 189, 248, 0.1)' : 'transparent', border: isEditingText ? '1px dashed #38bdf8' : 'none', borderRadius: '4px', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit', padding: isEditingText ? '4px 8px' : '0', outline: 'none', resize: 'vertical', boxSizing: 'border-box' };
 
- // 🔥 UPDATED: Dynamic Media Sizing + Forgiving Image Loader
+  // 🔥 UPGRADED MEDIA COMPONENT: Hover Overlay & Safety Net Loader
   const RenderMedia = () => {
-    if (!media.hasMedia || media.mediaType === 'none') return null;
+    const [isHovering, setIsHovering] = useState(false);
+
+    if (!localMedia.hasMedia || localMedia.mediaType === 'none') return null;
     
     let width = '120px';
     let height = '120px';
     
     if (layout === 'signature') {
-      width = media.shape === 'circle' ? '160px' : '150px';
-      height = media.shape === 'rectangle' ? '190px' : '160px';
+      width = localMedia.shape === 'circle' ? '160px' : '150px';
+      height = localMedia.shape === 'rectangle' ? '190px' : '160px';
     } else if (layout === 'startup') {
-      width = media.shape === 'circle' ? '110px' : '100px';
-      height = media.shape === 'rectangle' ? '130px' : '110px';
+      width = localMedia.shape === 'circle' ? '110px' : '100px';
+      height = localMedia.shape === 'rectangle' ? '130px' : '110px';
     } else { // executive
-      width = media.shape === 'circle' ? '140px' : '130px';
-      height = media.shape === 'rectangle' ? '160px' : '140px';
+      width = localMedia.shape === 'circle' ? '140px' : '130px';
+      height = localMedia.shape === 'rectangle' ? '160px' : '140px';
     }
     
-    const borderRadius = media.shape === 'circle' ? '50%' : media.shape === 'rectangle' ? '8px' : '16px';
+    const borderRadius = localMedia.shape === 'circle' ? '50%' : localMedia.shape === 'rectangle' ? '8px' : '16px';
     
-    // 🌟 FIX: Aggressively grab the image source, ignoring strict 'photo' labels!
-    const imageSource = printPhotoUrl || media.photoUrl || media.publicUrl || media.url;
+    // 🌟 THE SAFETY NET: Grabs the image no matter what property name the uploader used!
+    const imageSource = printPhotoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.preview || localMedia.url || localMedia.publicUrl;
     
     return (
-      <div className={`video-module-print-hide ${pdfAction === 'remove' ? 'pdf-remove-shape' : ''}`} style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }}>
-        <div style={{ position: 'relative', width, height, borderRadius, overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', backgroundColor: '#000', border: `3px solid var(--accent)`, zIndex: 1 }}>
+      <div 
+        className={`video-module-print-hide ${pdfAction === 'remove' ? 'pdf-remove-shape' : ''}`} 
+        style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <div style={{ position: 'relative', width, height, borderRadius, overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', backgroundColor: '#1e293b', border: `3px solid var(--accent)`, zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           
-          {/* Show Video if it is explicitly a video */}
-          {media.mediaType === 'video' && (
-            <video className="web-video" src={media.videoUrl || media.publicUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {localMedia.mediaType === 'video' && (
+            <video className="web-video" src={localMedia.videoUrl || localMedia.publicUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           )}
           
-          {/* Show Image (Works for normal photos, OR as the print-fallback for videos) */}
-          {imageSource && (
+          {(imageSource || localMedia.mediaType === 'photo') && (
             <img 
-              className={media.mediaType === 'video' ? "print-photo" : ""} 
+              className={localMedia.mediaType === 'video' ? "print-photo" : ""} 
               src={imageSource} 
               alt="Profile" 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              onError={(e) => {
+                // If it still breaks, show a gray error instead of a black void!
+                e.target.style.display = 'none';
+                e.target.parentElement.style.backgroundColor = '#334155';
+              }}
             />
           )}
-          
+
+          {/* 🌟 THE HOVER OVERLAY UI */}
+          {!isPublicView && isHovering && (
+            <div className="no-print" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', zIndex: 10 }}>
+              <button 
+                onClick={onEditMedia} 
+                style={{ padding: '6px 16px', backgroundColor: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Pencil size={14} /> Retake
+              </button>
+              <button 
+                onClick={() => setLocalMedia({ ...localMedia, hasMedia: false, mediaType: 'none' })} 
+                style={{ padding: '6px 16px', backgroundColor: 'transparent', color: '#f8fafc', border: '1px solid #94a3b8', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Trash2 size={14} /> Remove
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     );
   };
-  
+
   return (
     <>
       <style>
@@ -471,7 +492,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
         <div style={{ display: activeView === 'resume' ? 'block' : 'none' }}>
            <div ref={resumeRef} className={`resume-container print-container layout-${layout}`}>
             
-            {/* 🌟 SIGNATURE ONLY SIDEBAR: Photo + Vertical Skills */}
             {layout === 'signature' && (
               <div className="sidebar-rail">
                 <RenderMedia />
@@ -496,7 +516,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
               
               {layout === 'executive' && ( <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}> <RenderMedia /> </div> )}
               
-              {/* 🌟 STARTUP & EXECUTIVE HEADER: Name Left, Photo Right (for Startup) */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', gap: '30px', flexDirection: layout === 'executive' ? 'column-reverse' : 'row' }}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: layout === 'executive' ? 'center' : 'flex-start', textAlign: layout === 'executive' ? 'center' : 'left' }}>
                   <h1 className="name-header">{name}</h1>
@@ -518,7 +537,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                   )}
                 </div>
 
-                {/* 🌟 STARTUP ONLY: Photo on the right! */}
                 {layout === 'startup' && <RenderMedia />}
               </div>
 
@@ -526,7 +544,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                 {isEditingText ? ( <textarea style={{ ...inputStyle, minHeight: '120px', fontSize: '16px', lineHeight: '1.9' }} value={editableData.summary} onChange={(e) => setEditableData({...editableData, summary: e.target.value})} /> ) : ( <p style={{ fontSize: '16px', lineHeight: '1.9', opacity: 0.9 }}>{editableData.summary}</p> )}
               </div>
               
-              {/* 🌟 HORIZONTAL SKILL PILLS (For Startup & Exec Layouts) */}
               {layout !== 'signature' && (
                 <div style={{ marginBottom: '40px' }}>
                    <h3 className="section-title"><Target size={18} /> Core Competencies</h3>
