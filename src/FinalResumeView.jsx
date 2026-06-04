@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2 } from 'lucide-react';
+import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 
@@ -333,13 +333,38 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
         {/* --- MAIN APP CONTROL PANEL --- */}
         {!isPublicView && (
           <div className="no-print" style={{ backgroundColor: '#0f172a', padding: '20px 30px', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid #1e293b' }}>
-            <div style={{ display: 'flex', backgroundColor: '#1e293b', borderRadius: '10px', padding: '6px' }}>
-              <button onClick={() => setActiveView('resume')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'resume' ? '#38bdf8' : 'transparent', color: activeView === 'resume' ? '#0f172a' : '#94a3b8' }}>
-                <FileText size={16} /> Resume Builder
-              </button>
-              <button onClick={() => setActiveView('coaching')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'coaching' ? '#8b5cf6' : 'transparent', color: activeView === 'coaching' ? '#ffffff' : '#94a3b8' }}>
-                <BrainCircuit size={16} /> AI Coaching
-              </button>
+            
+            {/* LEFT SIDE: Toggles & Upgrade Status */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+              
+              <div style={{ display: 'flex', backgroundColor: '#1e293b', borderRadius: '10px', padding: '6px' }}>
+                <button onClick={() => setActiveView('resume')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'resume' ? '#38bdf8' : 'transparent', color: activeView === 'resume' ? '#0f172a' : '#94a3b8' }}>
+                  <FileText size={16} /> Resume Builder
+                </button>
+                <button onClick={() => setActiveView('coaching')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'coaching' ? '#8b5cf6' : 'transparent', color: activeView === 'coaching' ? '#ffffff' : '#94a3b8' }}>
+                  <BrainCircuit size={16} /> AI Coaching
+                </button>
+              </div>
+
+              {/* 🌟 NEW: Dynamic Tier Badge & Upgrade Button */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '20px', borderLeft: '1px solid #334155' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#1e293b', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', color: subscriptionTier === 'executive' ? '#fbbf24' : subscriptionTier === 'pro' ? '#38bdf8' : '#94a3b8' }}>
+                  <Star size={14} />
+                  {subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)} Tier
+                </div>
+                
+                {subscriptionTier !== 'executive' && (
+                  <button 
+                    onClick={() => navigate('/pricing')} 
+                    style={{ padding: '6px 16px', backgroundColor: 'transparent', color: '#10b981', border: '1px solid #10b981', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#10b981'; e.currentTarget.style.color = '#fff'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#10b981'; }}
+                  >
+                    Upgrade
+                  </button>
+                )}
+              </div>
+
             </div>
 
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -393,7 +418,13 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
               <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><Palette size={12}/> Color Mode</span>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', backgroundColor: '#0f172a', padding: '4px', borderRadius: '8px' }}>
                 <button onClick={() => setThemeMode('preset')} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'preset' ? '#334155' : 'transparent', color: themeMode === 'preset' ? '#fff' : '#94a3b8' }}>Presets</button>
-                <button onClick={() => { if (isPremium) setThemeMode('custom'); else alert("🌟 Advanced styling is a Pro feature. Please upgrade your tier!"); }} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'custom' ? '#38bdf8' : 'transparent', color: themeMode === 'custom' ? '#0f172a' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <button 
+                  onClick={() => { 
+                    if (isPremium) setThemeMode('custom'); 
+                    else navigate('/pricing'); // 👈 Changed from alert()
+                  }} 
+                  style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'custom' ? '#38bdf8' : 'transparent', color: themeMode === 'custom' ? '#0f172a' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
                   Custom {!isPremium && <Lock size={12} />}
                 </button>
               </div>
@@ -440,7 +471,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                   <Lock size={48} color="#38bdf8" style={{ margin: '0 auto 20px auto' }} />
                   <h3 style={{ fontSize: '28px', fontWeight: '800', color: '#f8fafc', margin: '0 0 16px 0' }}>Unlock Career Coaching</h3>
                   <p style={{ fontSize: '16px', color: '#cbd5e1', marginBottom: '32px', lineHeight: '1.6' }}>Upgrade to a <strong>Pro</strong> or <strong>Executive</strong> plan to reveal your high-probability role matches and critical skill gap analysis.</p>
-                  <button onClick={() => navigate('/dashboard')} style={{ padding: '14px 28px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', width: '100%', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)' }}>
+                  <button onClick={() => navigate('/pricing')} style={{ padding: '14px 28px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', width: '100%', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)' }}>
                     View Upgrade Plans
                   </button>
                 </div>
@@ -474,7 +505,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                               <span style={{ backgroundColor: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>PREMIUM</span> {gap.paidResource || "Industry Certification"}
                             </div>
                           ) : (
-                            <div onClick={() => navigate('/dashboard')} style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px dashed #475569', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}>
+                            <div onClick={() => navigate('/pricing')} style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', border: '1px dashed #475569', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}>
                               <Lock size={12} /> Executive Tier Path
                             </div>
                           )}
