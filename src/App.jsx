@@ -117,6 +117,23 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
     }
   }, [location]);
 
+  // 🔥 NEW: Safely wipe the memory and start over
+  const handleReset = () => {
+    // 1. Wipe the browser's temporary storage
+    sessionStorage.removeItem('resumeStep');
+    sessionStorage.removeItem('resumeData');
+    sessionStorage.removeItem('resumeFinal');
+
+    // 2. Clear out the location state (in case they came from the Dashboard "Edit" button)
+    window.history.replaceState({}, document.title);
+
+    // 3. Reset the live React state to trigger a fresh start
+    setUserData({ experienceLevel: 'Mid Level' });
+    setFinalResume('');
+    setEditId(null);
+    setStep(1); 
+  };
+
   const handleBaselineComplete = (data) => { setUserData({ ...userData, baseline: data }); setStep(2); };
   const handleExperienceSelect = (level) => { setUserData({ ...userData, experienceLevel: level }); setStep(3); };
   const handleDetailsComplete = (details) => { setUserData({ ...userData, experienceDetails: details }); setStep(4); };
@@ -191,7 +208,7 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
               resumeText={finalResume} 
               userData={userData} 
               editId={editId} 
-              onReset={() => window.location.reload()} 
+              onReset={handleReset} // ✅ Replaced with our new function!
               onRegenerate={handleRegenerate} 
               isGenerating={isGenerating}
               isPremium={isPremium} 

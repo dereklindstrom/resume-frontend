@@ -107,6 +107,15 @@ export default function Dashboard() {
     }
   };
 
+  // 🌟 THE DASHBOARD FIX: Wipe memory before starting a new resume!
+  const handleCreateNew = () => {
+    sessionStorage.removeItem('resumeStep');
+    sessionStorage.removeItem('resumeData');
+    sessionStorage.removeItem('resumeFinal');
+    setShowPricingModal(false);
+    navigate('/builder');
+  };
+
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
       
@@ -162,10 +171,7 @@ export default function Dashboard() {
             {/* 🌟 THE NEW ESCAPE HATCH FOR FREE USERS */}
             <div style={{ textAlign: 'center', marginTop: '32px' }}>
               <button 
-                onClick={() => {
-                  setShowPricingModal(false);
-                  navigate('/builder');
-                }} 
+                onClick={handleCreateNew} // 👈 Point this to our new function!
                 style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: '600', cursor: 'pointer', fontSize: '15px', textDecoration: 'underline' }}
               >
                 Skip for now, continue with Free tier
@@ -195,7 +201,7 @@ export default function Dashboard() {
             <p style={{ fontSize: '16px', color: '#64748b', margin: 0 }}>Manage your career snapshots.</p>
           </div>
           <button onClick={() => setShowPricingModal(true)} style={{ padding: '14px 24px', backgroundColor: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Plus size={18} /> Create New Profile
+            <Plus size={18} /> Create New Resume
           </button>
         </div>
 
@@ -205,7 +211,7 @@ export default function Dashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
             {resumes.length === 0 ? (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px', border: '1px dashed #cbd5e1', borderRadius: '20px' }}>
-                <p>No profiles found. Start building to see them here!</p>
+                <p>No Resumes found. Start building to see them here!</p>
               </div>
             ) : (
               resumes.map((resume) => (
