@@ -118,26 +118,41 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
+      // 🌟 SAFETY NET 1: Ensure the user's session didn't drop
+      if (!auth.currentUser) {
+        alert("Session expired. Please log in again to publish.");
+        setIsPublishing(false);
+        return;
+      }
+
       let publicMediaUrl = null;
       const activeMediaUrl = printPhotoUrl || localMedia.videoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.url;
       
-      // Only upload if it's a blob/local URL, otherwise just save the existing string
-      if (activeMediaUrl && activeMediaUrl.startsWith('blob:')) {
-        const response = await fetch(activeMediaUrl); const blob = await response.blob(); const fileRef = ref(storage, `media/${Date.now()}-profile`);
-        await uploadBytes(fileRef, blob); publicMediaUrl = await getDownloadURL(fileRef);
+      // 🌟 SAFETY NET 2: Ensure activeMediaUrl exists AND is a string before checking startsWith!
+      if (activeMediaUrl && typeof activeMediaUrl === 'string' && activeMediaUrl.startsWith('blob:')) {
+        const response = await fetch(activeMediaUrl); 
+        const blob = await response.blob(); 
+        const fileRef = ref(storage, `media/${Date.now()}-profile`);
+        await uploadBytes(fileRef, blob); 
+        publicMediaUrl = await getDownloadURL(fileRef);
       } else {
-        publicMediaUrl = activeMediaUrl;
+        publicMediaUrl = activeMediaUrl || null;
       }
 
       const docRef = await addDoc(collection(db, "resumes"), {
-        userId: auth.currentUser.uid, profileData: editableData,
+        userId: auth.currentUser.uid, 
+        profileData: editableData,
         userData: { baseline: userData.baseline, objective: userData.objective, experienceDetails: userData.experienceDetails },
         design: { layout, palette },
         media: { hasMedia: !!publicMediaUrl || localMedia.hasMedia, mediaType: printPhotoUrl ? 'photo' : localMedia.mediaType, shape: localMedia.shape || 'circle', publicUrl: publicMediaUrl },
         createdAt: new Date().toISOString()
       });
       setPublishId(docRef.id);
-    } catch (error) { alert("Failed to publish. Check the console for details."); }
+    } catch (error) { 
+      // 🌟 SAFETY NET 3: Actually print the error to the console!
+      console.error("🔥 PUBLISH ERROR DETECTED:", error);
+      alert(`Failed to publish: ${error.message}. Check the console for full details.`); 
+    }
     setIsPublishing(false);
   };
 
