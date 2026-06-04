@@ -150,7 +150,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
 
   const inputStyle = { width: '100%', background: isEditingText ? 'rgba(56, 189, 248, 0.1)' : 'transparent', border: isEditingText ? '1px dashed #38bdf8' : 'none', borderRadius: '4px', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit', padding: isEditingText ? '4px 8px' : '0', outline: 'none', resize: 'vertical', boxSizing: 'border-box' };
 
-  // 🔥 UPDATED: Dynamic Media Sizing per Layout
+ // 🔥 UPDATED: Dynamic Media Sizing + Forgiving Image Loader
   const RenderMedia = () => {
     if (!media.hasMedia || media.mediaType === 'none') return null;
     
@@ -170,16 +170,33 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     
     const borderRadius = media.shape === 'circle' ? '50%' : media.shape === 'rectangle' ? '8px' : '16px';
     
+    // 🌟 FIX: Aggressively grab the image source, ignoring strict 'photo' labels!
+    const imageSource = printPhotoUrl || media.photoUrl || media.publicUrl || media.url;
+    
     return (
       <div className={`video-module-print-hide ${pdfAction === 'remove' ? 'pdf-remove-shape' : ''}`} style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }}>
         <div style={{ position: 'relative', width, height, borderRadius, overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', backgroundColor: '#000', border: `3px solid var(--accent)`, zIndex: 1 }}>
-          {media.mediaType === 'video' && <video className="web-video" src={media.videoUrl || media.publicUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-          {(printPhotoUrl || media.mediaType === 'photo') && <img className={media.mediaType === 'video' ? "print-photo" : ""} src={printPhotoUrl || media.photoUrl || media.publicUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+          
+          {/* Show Video if it is explicitly a video */}
+          {media.mediaType === 'video' && (
+            <video className="web-video" src={media.videoUrl || media.publicUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          )}
+          
+          {/* Show Image (Works for normal photos, OR as the print-fallback for videos) */}
+          {imageSource && (
+            <img 
+              className={media.mediaType === 'video' ? "print-photo" : ""} 
+              src={imageSource} 
+              alt="Profile" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            />
+          )}
+          
         </div>
       </div>
     );
   };
-
+  
   return (
     <>
       <style>
