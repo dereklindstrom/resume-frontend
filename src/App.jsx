@@ -213,7 +213,8 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
               isGenerating={isGenerating}
               isPremium={isPremium} 
               subscriptionTier={subscriptionTier}
-              onEditMedia={() => setStep(6)} // 👈 ADD THIS ONE NEW LINE!
+              onEditMedia={() => setStep(6)} //
+              onEditProfile={() => setStep(1)} /* 👈 ADD THIS ONE NEW LINE! */
             />
           )}
         </>

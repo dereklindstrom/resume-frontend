@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star } from 'lucide-react';
+import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 
@@ -9,7 +9,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
 // 🌟 ADDED onEditMedia to the props!
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free', onEditMedia }) {  
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free', onEditMedia, onEditProfile }) {  
   const [activeView, setActiveView] = useState('resume'); 
   const [layout, setLayout] = useState('signature'); 
   const [palette, setPalette] = useState('cobalt');
@@ -395,6 +395,14 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={onEditProfile} 
+                  style={{ padding: '10px 20px', backgroundColor: 'transparent', border: '1px solid #475569', color: '#cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#1e293b'; e.currentTarget.style.color = '#f8fafc'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#cbd5e1'; }}
+                >
+                  <ArrowLeft size={16} /> Edit Form
+                </button>
                 <button onClick={onRegenerate} disabled={isGenerating} style={{ padding: '10px 20px', backgroundColor: isPremium ? 'rgba(245, 158, 11, 0.1)' : 'transparent', border: '1px solid #f59e0b', color: '#fbbf24', borderRadius: '8px', cursor: isGenerating ? 'not-allowed' : 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', opacity: isGenerating ? 0.5 : 1 }}>
                   <RefreshCw size={16} className={isGenerating ? "spin-animation" : ""} /> 
                   {isGenerating ? 'Drafting...' : (isPremium ? '✨ Power Regenerate' : 'Regenerate')}
