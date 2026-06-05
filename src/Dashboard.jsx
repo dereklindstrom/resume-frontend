@@ -215,10 +215,16 @@ export default function Dashboard() {
               </div>
             ) : (
               resumes.map((resume) => (
-                <div 
+               <div 
                   key={resume.id} 
-                  onClick={() => navigate('/builder', { state: { editData: resume } })}
-                  style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', cursor: 'pointer', transition: 'all 0.2s', position: 'relative', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}
+                  onClick={() => {
+                    // 🌟 FIX: Wipe old memory so the saved resume loads perfectly clean!
+                    sessionStorage.removeItem('resumeStep');
+                    sessionStorage.removeItem('resumeData');
+                    sessionStorage.removeItem('resumeFinal');
+                    navigate('/builder', { state: { editData: resume } });
+                  }}
+                  style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', cursor: 'pointer', transition: 'all 0.2s', position: 'relative', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }} 
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0,0,0,0.05)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'; }}
                 >

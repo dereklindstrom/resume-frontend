@@ -126,11 +126,10 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       }
 
       let publicMediaUrl = null;
-      const activeMediaUrl = printPhotoUrl || localMedia.videoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.url;
-      
+        const activeMediaUrl = printPhotoUrl || localMedia.videoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.url || localMedia.publicUrl;
+
       // 🌟 SAFETY NET 2: Ensure activeMediaUrl exists AND is a string before checking startsWith!
-      if (activeMediaUrl && typeof activeMediaUrl === 'string' && activeMediaUrl.startsWith('blob:')) {
-        const response = await fetch(activeMediaUrl); 
+      if (activeMediaUrl && typeof activeMediaUrl === 'string' && activeMediaUrl.startsWith('blob:')) {        const response = await fetch(activeMediaUrl); 
         const blob = await response.blob(); 
         const fileRef = ref(storage, `media/${Date.now()}-profile`);
         await uploadBytes(fileRef, blob); 
