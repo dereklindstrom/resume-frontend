@@ -1,78 +1,76 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { db } from './firebase';
+import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase';
 import FinalResumeView from './FinalResumeView';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function PublicProfile() {
-  const { profileId } = useParams(); // Grabs the ID from the URL
-  const [profileData, setProfileData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { id } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-  const fetchProfile = async () => {
-    console.log("Searching for ID:", profileId); // 👈 Log 1
-    try {
-      const docRef = doc(db, "resumes", profileId);
-      const docSnap = await getDoc(docRef);
+    const fetchProfile = async () => {
+      try {
+        const docRef = doc(db, 'resumes', id);
+        const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        console.log("Data found:", docSnap.data()); // 👈 Log 2
-        setProfileData(docSnap.data());
-      } else {
-        console.log("No document found in Firestore!");
-        setError("This profile doesn't exist.");
-      }
+        if (docSnap.exists()) {
+          setData(docSnap.data());
+        } else {
+          setError(true);
+        }
       } catch (err) {
-        console.error("Error fetching public profile:", err);
-        setError("Something went wrong while loading this profile.");
+        console.error("Error fetching profile:", err);
+        setError(true);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [profileId]);
+  }, [id]);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f8fafc' }}>
-        <Loader2 size={48} color="#3b82f6" className="spin-animation" />
-        <p style={{ marginTop: '16px', color: '#64748b', fontWeight: '600' }}>Loading ResuME...</p>
-        <style>{`.spin-animation { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}>
+        <Loader2 size={48} color="#38bdf8" style={{ animation: 'spin 1s linear infinite' }} />
+        <p style={{ marginTop: '16px', color: '#64748b', fontWeight: '600', fontFamily: 'system-ui' }}>Loading digital profile...</p>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', padding: '20px', textAlign: 'center' }}>
-        <AlertCircle size={48} color="#ef4444" />
-        <h2 style={{ color: '#1e293b', marginTop: '16px' }}>Oops!</h2>
-        <p style={{ color: '#64748b' }}>{error}</p>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'system-ui' }}>
+        <AlertCircle size={64} color="#ef4444" style={{ marginBottom: '16px' }} />
+        <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' }}>Profile Not Found</h1>
+        <p style={{ color: '#64748b', marginBottom: '24px' }}>This link may be expired, invalid, or the user may have removed their profile.</p>
+        <Link to="/" style={{ padding: '10px 20px', backgroundColor: '#38bdf8', color: '#0f172a', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
+          Build Your Own ResuME
+        </Link>
       </div>
     );
   }
 
-  // 🔥 THE MAGIC: We reuse your existing FinalResumeView!
-  // We pass it the data from the database and set a "publicMode" flag
+  // Combine the DB data exactly how FinalResumeView expects it
+  const userData = {
+    ...data.userData,
+    media: data.media
+  };
+
   return (
-    <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh', paddingBottom: '50px' }}>
+    <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh', padding: '40px 20px' }}>
       <FinalResumeView 
-        resumeText={profileData.profileData} 
-        
-        /* 🔥 THE FIX: Merge the media object into the userData so the resume can see it! */
-        userData={{ ...profileData.userData, media: profileData.media }} 
-        
-        isPublicView={true} 
+        resumeText={data.profileData}
+        userData={userData}
+        isPublicView={true}
+        initialLayout={data.design?.layout || 'signature'}
+        initialPalette={data.design?.palette || 'cobalt'}
       />
-      
-      {/* Small subtle branding footer for recruiters */}
-      <div style={{ textAlign: 'center', marginTop: '40px', color: '#94a3b8', fontSize: '13px' }}>
-        Powered by <strong style={{ color: '#3b82f6' }}>ResuME</strong>
-      </div>
     </div>
   );
 }

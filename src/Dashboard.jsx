@@ -250,9 +250,14 @@ export default function Dashboard() {
                       </div>
                     )}
                     
-                    <button onClick={(e) => handleDelete(e, resume.id)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '4px' }} title="Delete">
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={(e) => handleShare(e, resume.id)} style={{ background: 'none', border: 'none', color: copiedId === resume.id ? '#10b981' : '#38bdf8', cursor: 'pointer', padding: '4px', transition: 'all 0.2s' }} title="Copy Public Link">
+                        {copiedId === resume.id ? <Check size={16} /> : <Share2 size={16} />}
+                      </button>
+                      <button onClick={(e) => handleDelete(e, resume.id)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', padding: '4px' }} title="Delete">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ backgroundColor: '#eff6ff', color: '#3b82f6', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>

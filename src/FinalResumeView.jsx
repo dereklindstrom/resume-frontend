@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star, ArrowLeft } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
+import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star, ArrowLeft, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
+
 
 import { db, storage, auth } from './firebase'; 
 import { collection, addDoc } from 'firebase/firestore';
@@ -9,10 +11,13 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
 // 🌟 ADDED onEditMedia to the props!
-export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free', onEditMedia, onEditProfile }) {  
+// 🌟 Added initialLayout and initialPalette to the props list
+export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free', onEditMedia, onEditProfile, initialLayout = 'signature', initialPalette = 'cobalt' }) {  
   const [activeView, setActiveView] = useState('resume'); 
-  const [layout, setLayout] = useState('signature'); 
-  const [palette, setPalette] = useState('cobalt');
+  
+  // 🌟 Use the props to set the initial state!
+  const [layout, setLayout] = useState(initialLayout); 
+  const [palette, setPalette] = useState(initialPalette);
   
   const [themeMode, setThemeMode] = useState('preset'); 
   const [customTheme, setCustomTheme] = useState({
@@ -44,6 +49,8 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     contentRef: resumeRef,
     documentTitle: `${userData?.baseline?.name ? userData.baseline.name.replace(/\s+/g, '_') : 'My'}_ResuME`,
   });
+  const [showQR, setShowQR] = useState(false);
+  const activeDocId = publishId || editId; // Knows the ID if they just published OR if they loaded from the dashboard
 
   const layoutOptions = [
     { id: 'signature', name: 'Signature', isPremiumOnly: false },
@@ -232,6 +239,19 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     );
   };
 
+  const RenderQRCode = () => {
+    if (!showQR || !activeDocId) return null;
+    const url = `${window.location.origin}/profile/${activeDocId}`;
+    return (
+      <div className="print-qr-code" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+        <div style={{ padding: '6px', background: '#fff', borderRadius: '8px', border: '2px solid var(--accent)', display: 'inline-block' }}>
+          <QRCodeCanvas value={url} size={75} level="H" />
+        </div>
+        <span style={{ fontSize: '9px', color: 'var(--accent)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Scan for Video</span>
+      </div>
+    );
+  };
+
   return (
     <>
       <style>
@@ -412,6 +432,19 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                 {activeView === 'resume' && (
                   <>
                     <button onClick={() => setIsEditingText(!isEditingText)} style={{ padding: '10px 20px', backgroundColor: isEditingText ? '#22c55e' : 'transparent', border: isEditingText ? 'none' : '1px solid #4f46e5', color: isEditingText ? '#fff' : '#818cf8', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>{isEditingText ? <><Save size={16} /> Save Text</> : <><Pencil size={16} /> Edit Text</>}</button>
+                    <button 
+                      onClick={() => {
+                        if (!activeDocId) {
+                          alert("Please click 'Publish' first to generate your custom profile link!");
+                          return;
+                        }
+                        setShowQR(!showQR);
+                      }} 
+                      style={{ padding: '10px 20px', backgroundColor: showQR ? '#1e293b' : 'transparent', border: '1px solid #38bdf8', color: showQR ? '#f8fafc' : '#38bdf8', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <QrCode size={16} /> {showQR ? 'Hide QR Code' : 'Add QR Code'}
+                    </button>
+                    
                     <button onClick={handlePrintRequest} style={{ padding: '10px 20px', backgroundColor: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}><Download size={16} /> Print </button>
                     <button onClick={handlePublish} disabled={isPublishing} style={{ padding: '10px 20px', backgroundColor: isPublishing ? '#475569' : '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 10px rgba(79, 70, 229, 0.4)' }}>
                       <UploadCloud size={16} /> {isPublishing ? 'Publishing...' : 'Publish'}
@@ -573,6 +606,11 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: layout === 'executive' ? 'center' : 'flex-start', textAlign: layout === 'executive' ? 'center' : 'left' }}>
                   <h1 className="name-header">{name}</h1>
                   <h2 className="title-header">{targetRole}</h2>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <RenderQRCode />
+                  {layout === 'startup' && <RenderMedia />}
+                </div>
                   
                   <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', color: 'var(--text)', opacity: 0.8, fontSize: '14.5px', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> {phone}</span>
@@ -597,20 +635,35 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                 {isEditingText ? ( <textarea style={{ ...inputStyle, minHeight: '120px', fontSize: '16px', lineHeight: '1.9' }} value={editableData.summary} onChange={(e) => setEditableData({...editableData, summary: e.target.value})} /> ) : ( <p style={{ fontSize: '16px', lineHeight: '1.9', opacity: 0.9 }}>{editableData.summary}</p> )}
               </div>
               
-              {layout !== 'signature' && (
-                <div style={{ marginBottom: '40px' }}>
-                   <h3 className="section-title"><Target size={18} /> Core Competencies</h3>
-                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
-                     {editableData.skills?.map((skill, idx) => ( 
-                       isEditingText ? ( 
-                         <input key={idx} style={{ ...inputStyle, width: '140px', fontSize: '13px', padding: '6px 12px', borderRadius: '30px', border: '1px dashed #38bdf8' }} value={skill} onChange={(e) => updateSkill(idx, e.target.value)} /> 
-                       ) : ( 
-                         <span key={idx} style={{ padding: '6px 16px', background: 'rgba(0,0,0,0.04)', color: 'var(--primary)', borderRadius: '30px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(0,0,0,0.05)', whiteSpace: 'nowrap' }}>{skill}</span> 
-                       ) 
-                     ))}
-                   </div>
+             {layout === 'signature' && (
+              <div className="sidebar-rail" style={{ display: 'flex', flexDirection: 'column' }}>
+                
+                {/* Top Section: Photo & Skills */}
+                <div>
+                  <RenderMedia />
+                  <div style={{ marginTop: '40px' }}>
+                    <h3 className="sidebar-title" style={{ fontSize: '14px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '20px', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Target size={16} /> Core Expertise
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {editableData.skills?.map((skill, idx) => ( 
+                        isEditingText ? ( 
+                          <input key={idx} style={{ ...inputStyle, width: '100%', fontSize: '13px', padding: '4px' }} value={skill} onChange={(e) => updateSkill(idx, e.target.value)} /> 
+                        ) : ( 
+                          <div key={idx} style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 600, borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '8px' }}>{skill}</div> 
+                        ) 
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              )}
+
+                {/* 🌟 NEW: QR Code pinned to the absolute bottom of the rail! */}
+                <div style={{ marginTop: 'auto', paddingTop: '40px', display: 'flex', justifyContent: 'center' }}>
+                  <RenderQRCode />
+                </div>
+                
+              </div>
+            )}
               
               <div>
                 <h3 className="section-title"><Briefcase size={18} /> Professional Experience</h3>

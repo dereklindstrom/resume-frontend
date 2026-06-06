@@ -113,6 +113,7 @@ function BuilderFlow({ isPremium, subscriptionTier }) {
         media: savedResume.media
       });
       setFinalResume(savedResume.profileData);
+      setEditId(savedResume.id); // 👈 THIS IS THE NEW LINE!
       setStep(7);
     }
   }, [location]);
@@ -278,6 +279,8 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<AuthScreen />} />
         <Route path="/pricing" element={<PricingGate />} />
+
+        <Route path="/profile/:id" element={<PublicProfile />} />
         
         {/* Make sure this is exactly "/builder" */}
         <Route 
