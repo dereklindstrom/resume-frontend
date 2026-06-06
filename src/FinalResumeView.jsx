@@ -50,7 +50,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     documentTitle: `${userData?.baseline?.name ? userData.baseline.name.replace(/\s+/g, '_') : 'My'}_ResuME`,
   });
   const [showQR, setShowQR] = useState(false);
-  const activeDocId = publishId || editId; // Knows the ID if they just published OR if they loaded from the dashboard
 
   const layoutOptions = [
     { id: 'signature', name: 'Signature', isPremiumOnly: false },
@@ -90,6 +89,8 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const printCanvasRef = useRef(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishId, setPublishId] = useState(null);
+
+  const activeDocId = publishId || editId;
 
   const handleSignOut = async () => {
     try {
