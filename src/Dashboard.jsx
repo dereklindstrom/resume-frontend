@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db, auth } from './firebase';
 import { collection, query, where, onSnapshot, doc, getDocs, deleteDoc } from 'firebase/firestore'; 
 import { signOut } from 'firebase/auth';
-import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star, Check, X } from 'lucide-react';
+import { FileText, Plus, LogOut, Clock, Target, Briefcase, Trash2, Loader2, BrainCircuit, Star, Check, X, Share2 } from 'lucide-react';
 
 // 🌟 STEP 1: Define your Stripe Price IDs here
 const STRIPE_PRICES = {
@@ -16,6 +16,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isSuccess = searchParams.get('success') === 'true';
+  const [copiedId, setCopiedId] = useState(null);
 
   const [resumes, setResumes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,6 +106,14 @@ export default function Dashboard() {
       await deleteDoc(doc(db, "resumes", id));
       setResumes(resumes.filter(r => r.id !== id));
     }
+  };
+
+  const handleShare = (e, id) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/profile/${id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000); // Checkmark disappears after 2 seconds
   };
 
   // 🌟 THE DASHBOARD FIX: Wipe memory before starting a new resume!
