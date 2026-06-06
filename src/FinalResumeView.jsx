@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
+import QRCode from 'react-qr-code';
 import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star, ArrowLeft, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
@@ -245,7 +245,9 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     return (
       <div className="print-qr-code" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
         <div style={{ padding: '6px', background: '#fff', borderRadius: '8px', border: '2px solid var(--accent)', display: 'inline-block' }}>
-          <QRCodeCanvas value={url} size={75} level="H" />
+          
+          <QRCode value={url} size={75} />
+          
         </div>
         <span style={{ fontSize: '9px', color: 'var(--accent)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Scan for Video</span>
       </div>

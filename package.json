@@ -13,9 +13,9 @@
     "@vercel/analytics": "^2.0.1",
     "firebase": "^12.12.0",
     "lucide-react": "^1.8.0",
-    "qrcode.react": "^4.2.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-qr-code": "^2.0.21",
     "react-router-dom": "^7.14.2",
     "react-to-print": "^3.3.0"
   },
