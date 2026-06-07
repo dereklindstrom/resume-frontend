@@ -4,21 +4,15 @@ import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, Refr
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 
-
 import { db, storage, auth } from './firebase'; 
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
-// 🌟 ADDED onEditMedia to the props!
-// 🌟 Added initialLayout and initialPalette to the props list
 export default function FinalResumeView({ resumeText, userData, editId, onReset, onRegenerate, isGenerating, isPublicView = false, isPremium = false, subscriptionTier = 'free', onEditMedia, onEditProfile, initialLayout = 'signature', initialPalette = 'cobalt' }) {  
   const [activeView, setActiveView] = useState('resume'); 
-  
-  // 🌟 Use the props to set the initial state!
   const [layout, setLayout] = useState(initialLayout); 
   const [palette, setPalette] = useState(initialPalette);
-  
   const [themeMode, setThemeMode] = useState('preset'); 
   const [customTheme, setCustomTheme] = useState({
     primary: '#1e3a8a',
@@ -35,7 +29,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     coaching: { suggestedRoles: ["Loading..."], skillGaps: [] } 
   });
 
-  // 🌟 NEW: Local Media State so we can "Remove" it instantly from the UI
   const [localMedia, setLocalMedia] = useState(userData?.media || { hasMedia: false, mediaType: 'none' });
 
   useEffect(() => {
@@ -49,6 +42,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     contentRef: resumeRef,
     documentTitle: `${userData?.baseline?.name ? userData.baseline.name.replace(/\s+/g, '_') : 'My'}_ResuME`,
   });
+  
   const [showQR, setShowQR] = useState(false);
 
   const layoutOptions = [
@@ -126,7 +120,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
-      // 🌟 SAFETY NET 1: Ensure the user's session didn't drop
       if (!auth.currentUser) {
         alert("Session expired. Please log in again to publish.");
         setIsPublishing(false);
@@ -134,10 +127,10 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       }
 
       let publicMediaUrl = null;
-        const activeMediaUrl = printPhotoUrl || localMedia.videoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.url || localMedia.publicUrl;
+      const activeMediaUrl = printPhotoUrl || localMedia.videoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.url || localMedia.publicUrl;
 
-      // 🌟 SAFETY NET 2: Ensure activeMediaUrl exists AND is a string before checking startsWith!
-      if (activeMediaUrl && typeof activeMediaUrl === 'string' && activeMediaUrl.startsWith('blob:')) {        const response = await fetch(activeMediaUrl); 
+      if (activeMediaUrl && typeof activeMediaUrl === 'string' && activeMediaUrl.startsWith('blob:')) {        
+        const response = await fetch(activeMediaUrl); 
         const blob = await response.blob(); 
         const fileRef = ref(storage, `media/${Date.now()}-profile`);
         await uploadBytes(fileRef, blob); 
@@ -156,8 +149,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
       });
       setPublishId(docRef.id);
     } catch (error) { 
-      // 🌟 SAFETY NET 3: Actually print the error to the console!
-      console.error("🔥 PUBLISH ERROR DETECTED:", error);
+      console.error("PUBLISH ERROR:", error);
       alert(`Failed to publish: ${error.message}. Check the console for full details.`); 
     }
     setIsPublishing(false);
@@ -165,7 +157,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
 
   const inputStyle = { width: '100%', background: isEditingText ? 'rgba(56, 189, 248, 0.1)' : 'transparent', border: isEditingText ? '1px dashed #38bdf8' : 'none', borderRadius: '4px', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', color: 'inherit', padding: isEditingText ? '4px 8px' : '0', outline: 'none', resize: 'vertical', boxSizing: 'border-box' };
 
-  // 🔥 UPGRADED MEDIA COMPONENT: Hover Overlay & Safety Net Loader
   const RenderMedia = () => {
     const [isHovering, setIsHovering] = useState(false);
 
@@ -180,14 +171,12 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     } else if (layout === 'startup') {
       width = localMedia.shape === 'circle' ? '110px' : '100px';
       height = localMedia.shape === 'rectangle' ? '130px' : '110px';
-    } else { // executive
+    } else {
       width = localMedia.shape === 'circle' ? '140px' : '130px';
       height = localMedia.shape === 'rectangle' ? '160px' : '140px';
     }
     
     const borderRadius = localMedia.shape === 'circle' ? '50%' : localMedia.shape === 'rectangle' ? '8px' : '16px';
-    
-    // 🌟 THE SAFETY NET: Grabs the image no matter what property name the uploader used!
     const imageSource = printPhotoUrl || localMedia.photoUrl || localMedia.previewUrl || localMedia.preview || localMedia.url || localMedia.publicUrl;
     
     return (
@@ -210,14 +199,12 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
               alt="Profile" 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               onError={(e) => {
-                // If it still breaks, show a gray error instead of a black void!
                 e.target.style.display = 'none';
                 e.target.parentElement.style.backgroundColor = '#334155';
               }}
             />
           )}
 
-          {/* 🌟 THE HOVER OVERLAY UI */}
           {!isPublicView && isHovering && (
             <div className="no-print" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', zIndex: 10 }}>
               <button 
@@ -246,9 +233,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     return (
       <div className="print-qr-code" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
         <div style={{ padding: '6px', background: '#fff', borderRadius: '8px', border: '2px solid var(--accent)', display: 'inline-block' }}>
-          
           <QRCode value={url} size={75} />
-          
         </div>
         <span style={{ fontSize: '9px', color: 'var(--accent)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Scan for Video</span>
       </div>
@@ -371,9 +356,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
         {!isPublicView && (
           <div className="no-print" style={{ backgroundColor: '#0f172a', padding: '20px 30px', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid #1e293b' }}>
             
-            {/* LEFT SIDE: Toggles & Upgrade Status */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-              
               <div style={{ display: 'flex', backgroundColor: '#1e293b', borderRadius: '10px', padding: '6px' }}>
                 <button onClick={() => setActiveView('resume')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'resume' ? '#38bdf8' : 'transparent', color: activeView === 'resume' ? '#0f172a' : '#94a3b8' }}>
                   <FileText size={16} /> Resume Builder
@@ -383,7 +366,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                 </button>
               </div>
 
-              {/* 🌟 NEW: Dynamic Tier Badge & Upgrade Button */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '20px', borderLeft: '1px solid #334155' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#1e293b', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', color: subscriptionTier === 'executive' ? '#fbbf24' : subscriptionTier === 'pro' ? '#38bdf8' : '#94a3b8' }}>
                   <Star size={14} />
@@ -401,7 +383,6 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                   </button>
                 )}
               </div>
-
             </div>
 
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -476,13 +457,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
               <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '1px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><Palette size={12}/> Color Mode</span>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', backgroundColor: '#0f172a', padding: '4px', borderRadius: '8px' }}>
                 <button onClick={() => setThemeMode('preset')} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'preset' ? '#334155' : 'transparent', color: themeMode === 'preset' ? '#fff' : '#94a3b8' }}>Presets</button>
-                <button 
-                  onClick={() => { 
-                    if (isPremium) setThemeMode('custom'); 
-                    else navigate('/pricing'); // 👈 Changed from alert()
-                  }} 
-                  style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'custom' ? '#38bdf8' : 'transparent', color: themeMode === 'custom' ? '#0f172a' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
+                <button onClick={() => { if (isPremium) setThemeMode('custom'); else navigate('/pricing'); }} style={{ padding: '4px 12px', fontSize: '12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: '600', backgroundColor: themeMode === 'custom' ? '#38bdf8' : 'transparent', color: themeMode === 'custom' ? '#0f172a' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   Custom {!isPremium && <Lock size={12} />}
                 </button>
               </div>
@@ -581,67 +556,9 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
         <div style={{ display: activeView === 'resume' ? 'block' : 'none' }}>
            <div ref={resumeRef} className={`resume-container print-container layout-${layout}`}>
             
+            {/* 🌟 THE ONLY SIDEBAR (Signature Layout Only) */}
             {layout === 'signature' && (
-              <div className="sidebar-rail">
-                <RenderMedia />
-                <div style={{ marginTop: '40px' }}>
-                  <h3 className="sidebar-title" style={{ fontSize: '14px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '20px', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Target size={16} /> Core Expertise
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {editableData.skills?.map((skill, idx) => ( 
-                      isEditingText ? ( 
-                        <input key={idx} style={{ ...inputStyle, width: '100%', fontSize: '13px', padding: '4px' }} value={skill} onChange={(e) => updateSkill(idx, e.target.value)} /> 
-                      ) : ( 
-                        <div key={idx} style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 600, borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '8px' }}>{skill}</div> 
-                      ) 
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="main-content">
-              
-              {layout === 'executive' && ( <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}> <RenderMedia /> </div> )}
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', gap: '30px', flexDirection: layout === 'executive' ? 'column-reverse' : 'row' }}>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: layout === 'executive' ? 'center' : 'flex-start', textAlign: layout === 'executive' ? 'center' : 'left' }}>
-                  <h1 className="name-header">{name}</h1>
-                  <h2 className="title-header">{targetRole}</h2>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <RenderQRCode />
-                  {layout === 'startup' && <RenderMedia />}
-                </div>
-                  
-                  <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', color: 'var(--text)', opacity: 0.8, fontSize: '14.5px', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> {phone}</span>
-                    <span style={{ opacity: 0.3 }}>|</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={14} /> {email}</span>
-                  </div>
-                  
-                  {userData.baseline?.linkedin && (
-                    <div style={{ marginTop: '16px', fontSize: '14px', display: 'flex', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
-                      <a href={userData.baseline.linkedin.startsWith('http') ? userData.baseline.linkedin : `https://${userData.baseline.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        {userData.baseline.linkedin.replace(/^https?:\/\//, '')}
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {layout === 'startup' && <RenderMedia />}
-              </div>
-
-              <div style={{ marginBottom: '40px' }}>
-                {isEditingText ? ( <textarea style={{ ...inputStyle, minHeight: '120px', fontSize: '16px', lineHeight: '1.9' }} value={editableData.summary} onChange={(e) => setEditableData({...editableData, summary: e.target.value})} /> ) : ( <p style={{ fontSize: '16px', lineHeight: '1.9', opacity: 0.9 }}>{editableData.summary}</p> )}
-              </div>
-              
-             {layout === 'signature' && (
               <div className="sidebar-rail" style={{ display: 'flex', flexDirection: 'column' }}>
-                
-                {/* Top Section: Photo & Skills */}
                 <div>
                   <RenderMedia />
                   <div style={{ marginTop: '40px' }}>
@@ -660,13 +577,66 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                   </div>
                 </div>
 
-                {/* 🌟 NEW: QR Code pinned to the absolute bottom of the rail! */}
+                {/* 🌟 QR Code pinned to the absolute bottom of the rail */}
                 <div style={{ marginTop: 'auto', paddingTop: '40px', display: 'flex', justifyContent: 'center' }}>
                   <RenderQRCode />
                 </div>
-                
               </div>
             )}
+
+            {/* 🌟 MAIN CONTENT STARTS HERE */}
+            <div className="main-content">
+              
+              {layout === 'executive' && ( <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}> <RenderMedia /> </div> )}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', gap: '30px', flexDirection: layout === 'executive' ? 'column-reverse' : 'row' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: layout === 'executive' ? 'center' : 'flex-start', textAlign: layout === 'executive' ? 'center' : 'left' }}>
+                  <h1 className="name-header">{name}</h1>
+                  <h2 className="title-header">{targetRole}</h2>
+
+                  <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', color: 'var(--text)', opacity: 0.8, fontSize: '14.5px', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> {phone}</span>
+                    <span style={{ opacity: 0.3 }}>|</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={14} /> {email}</span>
+                  </div>
+                  
+                  {userData.baseline?.linkedin && (
+                    <div style={{ marginTop: '16px', fontSize: '14px', display: 'flex', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
+                      <a href={userData.baseline.linkedin.startsWith('http') ? userData.baseline.linkedin : `https://${userData.baseline.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        {userData.baseline.linkedin.replace(/^https?:\/\//, '')}
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* Photo & QR alignment for Startup/Executive */}
+                {(layout === 'startup' || layout === 'executive') && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <RenderQRCode />
+                    {layout === 'startup' && <RenderMedia />}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginBottom: '40px' }}>
+                {isEditingText ? ( <textarea style={{ ...inputStyle, minHeight: '120px', fontSize: '16px', lineHeight: '1.9' }} value={editableData.summary} onChange={(e) => setEditableData({...editableData, summary: e.target.value})} /> ) : ( <p style={{ fontSize: '16px', lineHeight: '1.9', opacity: 0.9 }}>{editableData.summary}</p> )}
+              </div>
+              
+              {layout !== 'signature' && (
+                <div style={{ marginBottom: '40px' }}>
+                   <h3 className="section-title"><Target size={18} /> Core Competencies</h3>
+                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: layout === 'executive' ? 'center' : 'flex-start' }}>
+                     {editableData.skills?.map((skill, idx) => ( 
+                       isEditingText ? ( 
+                         <input key={idx} style={{ ...inputStyle, width: '140px', fontSize: '13px', padding: '6px 12px', borderRadius: '30px', border: '1px dashed #38bdf8' }} value={skill} onChange={(e) => updateSkill(idx, e.target.value)} /> 
+                       ) : ( 
+                         <span key={idx} style={{ padding: '6px 16px', background: 'rgba(0,0,0,0.04)', color: 'var(--primary)', borderRadius: '30px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(0,0,0,0.05)', whiteSpace: 'nowrap' }}>{skill}</span> 
+                       ) 
+                     ))}
+                   </div>
+                </div>
+              )}
               
               <div>
                 <h3 className="section-title"><Briefcase size={18} /> Professional Experience</h3>
