@@ -12,6 +12,7 @@ import AuthScreen from './AuthScreen';
 import PublicProfile from './PublicProfile';
 import ProtectedRoute from './ProtectedRoute';
 import PricingGate from './PricingGate';
+import RecommenderPortal from './RecommenderPortal';
 
 // --- BUILDER STEPS ---
 import BaselineForm from './BaselineForm';
@@ -281,7 +282,7 @@ export default function App() {
         <Route path="/pricing" element={<PricingGate />} />
 
         <Route path="/profile/:id" element={<PublicProfile />} />
-        
+        <Route path="/recommend/:id" element={<RecommenderPortal />} />
         {/* Make sure this is exactly "/builder" */}
         <Route 
           path="/builder" 
