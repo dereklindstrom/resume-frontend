@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star, ArrowLeft, QrCode } from 'lucide-react';
+import { MessageSquare, Link, Copy, Video, Mail, Phone, Target, Briefcase, GraduationCap, PlayCircle, Pencil, RefreshCw, Download, RotateCcw, LayoutDashboard, LayoutTemplate, Palette, Save, FileText, BrainCircuit, TrendingUp, AlertCircle, UploadCloud, CheckCircle, LogOut, Lock, Trash2, Star, ArrowLeft, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
 
 import { db, storage, auth } from './firebase'; 
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'; // 🌟 Added query, where, getDocs
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
@@ -85,6 +85,62 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
   const [publishId, setPublishId] = useState(null);
 
   const activeDocId = publishId || editId;
+
+  // 🌟 NEW: Recommendations State & Firebase Logic
+  const [recLinks, setRecLinks] = useState([]);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [copiedRecId, setCopiedRecId] = useState(null);
+
+  useEffect(() => {
+    if (!activeDocId) return;
+    const fetchRecommendations = async () => {
+      try {
+        const q = query(collection(db, "recommendations"), where("resumeId", "==", activeDocId));
+        const querySnapshot = await getDocs(q);
+        const fetchedLinks = [];
+        querySnapshot.forEach((doc) => {
+          fetchedLinks.push({ id: doc.id, ...doc.data() });
+        });
+        // Sort newest first
+        setRecLinks(fetchedLinks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      } catch (error) {
+        console.error("Error fetching recommendations:", error);
+      }
+    };
+    fetchRecommendations();
+  }, [activeDocId]);
+
+  const generateRecommendationLink = async () => {
+    if (!activeDocId) {
+      alert("Please hit 'Publish' on your profile first so we can attach the videos to it!");
+      return;
+    }
+    setIsGeneratingLink(true);
+    try {
+      const docRef = await addDoc(collection(db, "recommendations"), {
+        resumeId: activeDocId,
+        userId: auth.currentUser.uid,
+        status: 'pending', // Will change to 'recorded' then 'approved'
+        recommenderName: '', 
+        recommenderTitle: '',
+        videoUrl: null,
+        createdAt: new Date().toISOString()
+      });
+      
+      setRecLinks([{ id: docRef.id, status: 'pending', createdAt: new Date().toISOString() }, ...recLinks]);
+    } catch (error) {
+      console.error("Failed to generate link:", error);
+      alert("Failed to generate link. Check your console.");
+    }
+    setIsGeneratingLink(false);
+  };
+
+  const copyRecLink = (id) => {
+    const url = `${window.location.origin}/recommend/${id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedRecId(id);
+    setTimeout(() => setCopiedRecId(null), 2000);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -238,7 +294,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
           <QRCodeCanvas value={url} size={75} level="H" />
           
         </div>
-        <span style={{ fontSize: '9px', color: 'var(--accent)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Scan for Video</span>
+        <span style={{ fontSize: '9px', color: 'var(--accent)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>See more at ResuME</span>
       </div>
     );
   };
@@ -366,6 +422,9 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                 </button>
                 <button onClick={() => setActiveView('coaching')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'coaching' ? '#8b5cf6' : 'transparent', color: activeView === 'coaching' ? '#ffffff' : '#94a3b8' }}>
                   <BrainCircuit size={16} /> AI Coaching
+                </button>
+                <button onClick={() => setActiveView('recommendations')} style={{ padding: '8px 20px', fontSize: '14px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: activeView === 'recommendations' ? '#10b981' : 'transparent', color: activeView === 'recommendations' ? '#ffffff' : '#94a3b8' }}>
+                  <MessageSquare size={16} /> Video Recs
                 </button>
               </div>
 
@@ -555,6 +614,81 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
           </div>
         )}
 
+{/* 📹 VIDEO RECOMMENDATIONS VIEW */}
+        {activeView === 'recommendations' && (
+          <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', padding: '60px', borderRadius: '0 0 16px 16px', minHeight: '850px', position: 'relative' }}>
+            
+            {/* Premium Paywall Check */}
+            {['free', 'basic'].includes(subscriptionTier) && (
+              <div style={{ position: 'absolute', inset: 0, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', backgroundColor: 'rgba(15, 23, 42, 0.6)' }}>
+                <div style={{ backgroundColor: '#1e293b', padding: '50px', borderRadius: '24px', textAlign: 'center', maxWidth: '500px', border: '1px solid #334155' }}>
+                  <Lock size={48} color="#10b981" style={{ margin: '0 auto 20px auto' }} />
+                  <h3 style={{ fontSize: '28px', fontWeight: '800', color: '#f8fafc', margin: '0 0 16px 0' }}>Video Recommendations</h3>
+                  <p style={{ fontSize: '16px', color: '#cbd5e1', marginBottom: '32px', lineHeight: '1.6' }}>Upgrade to a <strong>Pro</strong> or <strong>Executive</strong> plan to collect authentic, recorded video endorsements from former colleagues and managers.</p>
+                  <button onClick={() => navigate('/pricing')} style={{ padding: '14px 28px', backgroundColor: '#10b981', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px', width: '100%' }}>View Upgrade Plans</button>
+                </div>
+              </div>
+            )}
+
+            <div style={{ filter: ['free', 'basic'].includes(subscriptionTier) ? 'blur(8px)' : 'none' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                <div>
+                  <h2 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '10px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '15px' }}><Video size={36} /> Video Endorsements</h2>
+                  <p style={{ fontSize: '18px', color: '#94a3b8', margin: 0 }}>Generate secure links to send to managers, direct reports, or clients.</p>
+                </div>
+                <button onClick={generateRecommendationLink} disabled={isGeneratingLink || !activeDocId} style={{ padding: '12px 24px', backgroundColor: '#10b981', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: (!activeDocId || isGeneratingLink) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: (!activeDocId) ? 0.5 : 1 }}>
+                  <Link size={18} /> {isGeneratingLink ? 'Creating...' : 'Generate New Link'}
+                </button>
+              </div>
+
+              {!activeDocId && (
+                <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', borderLeft: '4px solid #f59e0b', padding: '16px', borderRadius: '8px', marginBottom: '30px', color: '#fcd34d' }}>
+                  ⚠️ You must click <strong>Publish</strong> on the main builder tab before you can generate recommendation links.
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gap: '16px' }}>
+                {recLinks.length === 0 && activeDocId ? (
+                  <div style={{ textAlign: 'center', padding: '60px', border: '2px dashed #334155', borderRadius: '16px', color: '#64748b' }}>
+                    No links generated yet. Click the button above to create your first request!
+                  </div>
+                ) : (
+                  recLinks.map((rec) => (
+                    <div key={rec.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1e293b', padding: '20px', borderRadius: '12px', border: '1px solid #334155' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 'bold', color: rec.status === 'pending' ? '#f59e0b' : rec.status === 'recorded' ? '#38bdf8' : '#10b981', backgroundColor: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '11px' }}>
+                            {rec.status}
+                          </span>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>{new Date(rec.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        {rec.status === 'pending' ? (
+                          <div style={{ fontFamily: 'monospace', color: '#cbd5e1', fontSize: '15px' }}>
+                            {window.location.origin}/recommend/{rec.id}
+                          </div>
+                        ) : (
+                          <div style={{ color: '#f8fafc', fontSize: '16px', fontWeight: 'bold' }}>
+                            {rec.recommenderName || "Unknown"} <span style={{ color: '#94a3b8', fontWeight: 'normal', fontSize: '14px' }}>- {rec.recommenderTitle}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        {rec.status === 'pending' && (
+                          <button onClick={() => copyRecLink(rec.id)} style={{ padding: '8px 16px', backgroundColor: 'transparent', border: '1px solid #475569', color: copiedRecId === rec.id ? '#10b981' : '#cbd5e1', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
+                            {copiedRecId === rec.id ? <CheckCircle size={16} /> : <Copy size={16} />} {copiedRecId === rec.id ? 'Copied!' : 'Copy Link'}
+                          </button>
+                        )}
+                        {/* We will add Review/Approve buttons here in Phase 3! */}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* 📄 RESUME VIEW */}
         <div style={{ display: activeView === 'resume' ? 'block' : 'none' }}>
            <div ref={resumeRef} className={`resume-container print-container layout-${layout}`}>
