@@ -150,7 +150,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
     }
   };
   
-  const { name = "Derek Lindstrom", email = "email@example.com", phone = "(555) 555-5555" } = userData?.baseline || {};
+  const { name = "Your Name Here", email = "email@example.com", phone = "(555) 555-5555" } = userData?.baseline || {};
   const targetRole = userData?.objective?.targetRole || "Professional Resume";
   const showEdu = userData?.experienceDetails?.showEdu || false;
   const staticEducation = Array.isArray(userData?.experienceDetails?.eduDetails) ? userData.experienceDetails.eduDetails : [];
