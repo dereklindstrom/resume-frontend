@@ -493,7 +493,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
                     
                     <button onClick={handlePrintRequest} style={{ padding: '10px 20px', backgroundColor: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}><Download size={16} /> Print </button>
                     <button onClick={handlePublish} disabled={isPublishing} style={{ padding: '10px 20px', backgroundColor: isPublishing ? '#475569' : '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: isPublishing ? 'not-allowed' : 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 10px rgba(79, 70, 229, 0.4)' }}>
-                      <UploadCloud size={16} /> {isPublishing ? 'Publishing...' : 'Publish'}
+                      <UploadCloud size={16} /> {isPublishing ? 'Publishing...' : 'Save/Publish'}
                     </button>
                   </>
                 )}
@@ -688,7 +688,7 @@ export default function FinalResumeView({ resumeText, userData, editId, onReset,
             </div>
           </div>
         )}
-        
+
         {/* 📄 RESUME VIEW */}
         <div style={{ display: activeView === 'resume' ? 'block' : 'none' }}>
            <div ref={resumeRef} className={`resume-container print-container layout-${layout}`}>
