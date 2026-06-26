@@ -42,13 +42,16 @@ export default function PricingGate() {
 
     try {
       // 1. Call your Google Cloud Function to create the checkout session
-      const response = await fetch('https://createstripecheckout-u4ujgfkbxa-uc.a.run.app', { // <-- Replace with your actual Cloud Function URL if different!
+      const response = await fetch('https://createstripecheckout-u4ujgfkbxa-uc.a.run.app', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           priceId: priceId,
           userId: auth.currentUser.uid,
-          email: auth.currentUser.email
+          email: auth.currentUser.email, // Stripe can use this to pre-fill the checkout page!
+          tier: tier,                    // 🌟 FIX 1: Send the tier string
+          successUrl: `${window.location.origin}/builder`, // 🌟 FIX 2: Where to go on success
+          cancelUrl: `${window.location.origin}/pricing`   // 🌟 FIX 3: Where to go on cancel
         })
       });
 
