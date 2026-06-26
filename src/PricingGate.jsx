@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const STRIPE_PRICES = {
-  pro: "price_1TYJ2KFq1iLZWOKqbrEZq8jN",     // $3
-  coach: "price_1TYJ2FFq1iLZWOKqrtRIR4ng",         // $7
-  premium: "price_1TYJ2JFq1iLZWOKqlblyuhty"   // $9
+  basic: "price_1TmPVBFq1iLZWOKqNbua0fNo",     // $3
+  professional: "price_1TmPWcFq1iLZWOKqpKBTWQXd",         // $7
+  executive: "price_1TmPa7Fq1iLZWOKqcm6JDdxj"   // $9
 };
 
 export default function PricingGate() {
